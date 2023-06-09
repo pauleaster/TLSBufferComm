@@ -2,18 +2,39 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "build",
+        "label": "build_sender",
         "type": "shell",
         "command": "g++",
         "args": [
-          "-std=c++14",                 // Add the C++ version flag
+          "-std=c++14",
           "-I",
-          "/usr/local/include/boost",   // Add the Boost include path
+          "/usr/local/include/boost",
           "-L",
-          "/usr/local/lib",             // Add the Boost library path
-          "${file}",
+          "/usr/local/lib",
+          "${workspaceFolder}/sender.cpp",
           "-o",
-          "${fileDirname}/${fileBasenameNoExtension}"
+          "${workspaceFolder}/sender",
+          "-lboost_system"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "build_receiver",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-std=c++14",
+          "-I",
+          "/usr/local/include/boost",
+          "-L",
+          "/usr/local/lib",
+          "${workspaceFolder}/receiver.cpp",
+          "-o",
+          "${workspaceFolder}/receiver",
+          "-lboost_system"
         ],
         "group": {
           "kind": "build",
@@ -30,17 +51,17 @@
         "type": "command",
         "command": "ls",
         "args": [
-          "/usr/local/lib/libboost_*.so"  // Specify the Boost library pattern
+          "/usr/local/lib/libboost_*.so"
         ]
       }
     ],
     "problemMatcher": [],
     "configurations": [
       {
-        "name": "Debug",
+        "name": "Debug Sender",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${fileDirname}/${fileBasenameNoExtension}",
+        "program": "${workspaceFolder}/sender",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
@@ -50,10 +71,31 @@
         "miDebuggerPath": "gdb"
       },
       {
-        "name": "Run",
+        "name": "Run Sender",
         "type": "shell",
         "request": "launch",
-        "program": "${fileDirname}/${fileBasenameNoExtension}",
+        "program": "${workspaceFolder}/sender",
+        "args": [],
+        "cwd": "${workspaceFolder}"
+      },
+      {
+        "name": "Debug Receiver",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/receiver",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": true,
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb"
+      },
+      {
+        "name": "Run Receiver",
+        "type": "shell",
+        "request": "launch",
+        "program": "${workspaceFolder}/receiver",
         "args": [],
         "cwd": "${workspaceFolder}"
       }

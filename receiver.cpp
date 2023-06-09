@@ -11,11 +11,13 @@ int main() {
         io_service, boost::asio::ip::tcp::endpoint(
             boost::asio::ip::tcp::v4(), 1234));
     boost::asio::ip::tcp::socket socket(io_service);
+    acceptor.accept(socket);
 
     // Receive data
     std::array<char, 128> buffer;
     boost::system::error_code error;
     size_t bytesRead = socket.read_some(boost::asio::buffer(buffer), error);
+    io_service.run();
 
     if (error == boost::asio::error::eof) {
         std::cout << "Connection closed by peer" << std::endl;
