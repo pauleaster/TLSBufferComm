@@ -2,19 +2,60 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Build C++",
+        "label": "build",
         "type": "shell",
         "command": "g++",
         "args": [
-          "-std=c++14",
+          "-std=c++14",                 // Add the C++ version flag
+          "-I",
+          "/usr/local/include/boost",   // Add the Boost include path
+          "-L",
+          "/usr/local/lib",             // Add the Boost library path
+          "${file}",
           "-o",
-          "${workspaceFolder}/output",
-          "${file}"
+          "${fileDirname}/${fileBasenameNoExtension}"
         ],
         "group": {
           "kind": "build",
           "isDefault": true
         }
+      }
+    ],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    },
+    "inputs": [
+      {
+        "id": "boostLibraries",
+        "type": "command",
+        "command": "ls",
+        "args": [
+          "/usr/local/lib/libboost_*.so"  // Specify the Boost library pattern
+        ]
+      }
+    ],
+    "problemMatcher": [],
+    "configurations": [
+      {
+        "name": "Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${fileDirname}/${fileBasenameNoExtension}",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": true,
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb"
+      },
+      {
+        "name": "Run",
+        "type": "shell",
+        "request": "launch",
+        "program": "${fileDirname}/${fileBasenameNoExtension}",
+        "args": [],
+        "cwd": "${workspaceFolder}"
       }
     ]
   }
