@@ -31,8 +31,17 @@ int main() {
     ssl::context ctx(ssl::context::sslv23);
 
     // Load the certificate and private key files
-    ctx.use_certificate_file("certificate.pem", ssl::context::pem);
-    ctx.use_private_key_file("private_key.pem", ssl::context::pem);
+    const char* senderCertificateData = std::getenv("EB_SENDER_CERTIFICATE_DATA");
+    const char* senderPrivateKeyData = std::getenv("EB_SENDER_PRIVATE_KEY_DATA");
+
+if (!senderCertificateData || !senderPrivateKeyData) {
+    std::cerr << "Sender certificate data or private key data not provided." << std::endl;
+    return 1;
+}
+
+ctx.use_certificate(asio::buffer(senderCertificateData, std::strlen(senderCertificateData)), ssl::context::pem);
+ctx.use_private_key(asio::buffer(senderPrivateKeyData, std::strlen(senderPrivateKeyData)), ssl::context::pem);
+
 
     ssl::stream<tcp::socket> socket(io_service, ctx);
 
@@ -44,7 +53,7 @@ int main() {
     asio::async_connect(
         socket.lowest_layer(),
         endpoint_iterator,
-        [&socket](const boost::system::error_code& error, const tcp::endpoint&) {
+        [&socket](const boost::system::error_code& error, const tcp::resolver::iterator& endpoint_iterator ) {
             handleConnect(error);
             if (!error) {
                 socket.async_handshake(

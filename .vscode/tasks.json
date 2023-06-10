@@ -11,6 +11,7 @@
           "/usr/local/include/boost",
           "-L",
           "/usr/local/lib",
+          "-ftrack-macro-expansion=0","-ftrack-macro-expansion=0",
           "${workspaceFolder}/sender.cpp",
           "-o",
           "${workspaceFolder}/sender",
@@ -28,11 +29,12 @@
         "type": "shell",
         "command": "g++",
         "args": [
-          "-std=c++14",
+          "-std=c++14","-ftrack-macro-expansion=0",
           "-I",
           "/usr/local/include/boost",
           "-L",
           "/usr/local/lib",
+          "-ftrack-macro-expansion=0",
           "${workspaceFolder}/receiver.cpp",
           "-o",
           "${workspaceFolder}/receiver",
@@ -63,13 +65,13 @@
         "owner": "cpp",
         "fileLocation": ["absolute"],
         "pattern": {
-          "regexp": "^(.*)\\:(\\d+)\\:(\\d+)\\: (fatal )?(error|warning): (.+)$",
+          "regexp": "^(.*):(\\d+):(\\d+): (fatal )?(error|warning|note): (.+)$",
           "file": 1,
           "line": 2,
           "column": 3,
           "severity": 4,
           "message": 5
-        }
+      }    
       },
     "configurations": [
       {
