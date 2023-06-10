@@ -27,6 +27,11 @@ set -xg EB_SENDER_CERTIFICATE_DATA (cat "$cert_file")
 # Read the contents of the private key file into the environment variable
 set -xg EB_SENDER_PRIVATE_KEY_DATA (cat "$key_file")
 
+# Append the environment variable definitions to the config.fish file
+echo "set -xg EB_SENDER_CERTIFICATE_DATA '$EB_SENDER_CERTIFICATE_DATA'" >> ~/.config/fish/config.fish
+echo "set -xg EB_SENDER_PRIVATE_KEY_DATA '$EB_SENDER_PRIVATE_KEY_DATA'" >> ~/.config/fish/config.fish
+
+
 # Remove the temporary files
 rm "$cert_file" "$key_file"
 
