@@ -21,8 +21,9 @@ int main() {
     const std::string certificateFile = "/home/paul/.ssl/eb_receiver_certificate.pem";
     const std::string privateKeyFile = "/home/paul/.ssl/eb_receiver_private_key.pem";
 
-    ctx.use_private_key_file(privateKeyFile, ssl::context::pem);
     ctx.use_certificate_file(certificateFile, ssl::context::pem);
+    ctx.use_private_key_file(privateKeyFile, ssl::context::pem);
+    
     
 
 
