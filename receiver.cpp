@@ -25,9 +25,14 @@ int main() {
         std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
         return 1;
     }
+    else
+    {
+        printf("length of receiverCertificateData = %lu\n", strlen(receiverCertificateData));
+        printf("length of receiverPrivateKeyData = %lu\n", strlen(receiverPrivateKeyData));
+    }
 
-    ctx.use_certificate(asio::buffer(receiverCertificateData, std::strlen(receiverCertificateData)), ssl::context::pem);
-    ctx.use_private_key(asio::buffer(receiverPrivateKeyData, std::strlen(receiverPrivateKeyData)), ssl::context::pem);
+    ctx.use_certificate(asio::const_buffer(receiverCertificateData, std::strlen(receiverCertificateData)), ssl::context::pem);
+    ctx.use_private_key(asio::const_buffer(receiverPrivateKeyData, std::strlen(receiverPrivateKeyData)), ssl::context::pem);
 
 
     tcp::endpoint endpoint(asio::ip::address::from_string(receiverIP), port);

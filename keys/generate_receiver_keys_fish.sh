@@ -13,6 +13,9 @@ else
     set domain $argv[1]
 end
 
+# Set the directory to store the certificate and private key files
+set ssl_directory "$HOME/.ssl"
+mkdir -p "$ssl_directory"
 
 # Create temporary files for the certificate and private key
 set cert_file (mktemp)
@@ -21,17 +24,26 @@ set key_file (mktemp)
 # Generate the self-signed certificate and private key
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$key_file" -out "$cert_file" -subj "/CN=$domain" 2>/dev/null
 
-# Read the contents of the certificate file into the environment variable
-set -xg EB_RECEIVER_CERTIFICATE_DATA (cat "$cert_file")
+# Read the contents of the certificate file
+set certificate_data (cat "$cert_file")
 
-# Read the contents of the private key file into the environment variable
-set -xg EB_RECEIVER_PRIVATE_KEY_DATA (cat "$key_file")
+# Read the contents of the private key file
+set private_key_data (cat "$key_file")
+
+# Write the certificate data to a file
+set certificate_file "$ssl_directory/eb_receiver_certificate.pem"
+echo "$certificate_data" > "$certificate_file"
+
+# Write the private key data to a file
+set private_key_file "$ssl_directory/eb_receiver_private_key.pem"
+echo "$private_key_data" > "$private_key_file"
+
+# Set the environment variables
+set -xg EB_RECEIVER_CERTIFICATE_DATA "$certificate_data"
+set -xg EB_RECEIVER_PRIVATE_KEY_DATA "$private_key_data"
 
 # Append the environment variable definitions to the config.fish file
-echo "set -xg EB_RECEIVER_CERTIFICATE_DATA '$EB_RECEIVER_CERTIFICATE_DATA'" >> ~/.config/fish/config.fish
-echo "set -xg EB_RECEIVER_PRIVATE_KEY_DATA '$EB_RECEIVER_PRIVATE_KEY_DATA'" >> ~/.config/fish/config.fish
-
-# Remove the temporary files
-rm "$cert_file" "$key_file"
+echo "set -xg EB_RECEIVER_CERTIFICATE_DATA '$certificate_data'" >> ~/.config/fish/config.fish
+echo "set -xg EB_RECEIVER_PRIVATE_KEY_DATA '$private_key_data'" >> ~/.config/fish/config.fish
 
 echo "Keys generation completed successfully for Fish."
