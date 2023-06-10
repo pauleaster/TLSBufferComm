@@ -14,7 +14,9 @@
           "${workspaceFolder}/sender.cpp",
           "-o",
           "${workspaceFolder}/sender",
-          "-lboost_system"
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
         ],
         "group": {
           "kind": "build",
@@ -34,7 +36,9 @@
           "${workspaceFolder}/receiver.cpp",
           "-o",
           "${workspaceFolder}/receiver",
-          "-lboost_system"
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
         ],
         "group": {
           "kind": "build",

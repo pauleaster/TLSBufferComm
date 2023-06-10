@@ -1,4 +1,4 @@
-// Simple sender program using boost asio library
+// Simple asynchronous sender program using Boost.Asio library with encryption
 // C++ version 14
 
 #include <iostream>
@@ -6,11 +6,25 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
-
-
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
+
+void handleConnect(const boost::system::error_code& error) {
+    if (!error) {
+        std::cout << "Connected to the receiver" << std::endl;
+    } else {
+        std::cout << "Connect error: " << error.message() << std::endl;
+    }
+}
+
+void handleWrite(const boost::system::error_code& error, size_t bytesTransferred) {
+    if (!error) {
+        std::cout << "Message sent" << std::endl;
+    } else {
+        std::cout << "Write error: " << error.message() << std::endl;
+    }
+}
 
 int main() {
     asio::io_service io_service;
@@ -26,17 +40,35 @@ int main() {
     tcp::resolver resolver(io_service);
     tcp::resolver::query query("127.0.0.1", "1234");
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    asio::connect(socket.lowest_layer(), endpoint_iterator);
-    socket.handshake(ssl::stream_base::client);
 
-    // Send the message
-    std::string message = "Hello from sender";
-    asio::write(socket, asio::buffer(message));
+    asio::async_connect(
+        socket.lowest_layer(),
+        endpoint_iterator,
+        [&socket](const boost::system::error_code& error, const tcp::endpoint&) {
+            handleConnect(error);
+            if (!error) {
+                socket.async_handshake(
+                    ssl::stream_base::client,
+                    [&socket](const boost::system::error_code& error) {
+                        if (!error) {
+                            // Send the message
+                            std::string message = "Hello from sender";
+                            asio::async_write(
+                                socket,
+                                asio::buffer(message),
+                                [&socket](const boost::system::error_code& error, size_t bytesTransferred) {
+                                    handleWrite(error, bytesTransferred);
+                                    // Close the socket
+                                    socket.shutdown();
+                                });
+                        } else {
+                            std::cout << "Handshake error: " << error.message() << std::endl;
+                        }
+                    });
+            }
+        });
 
-    std::cout << "Message sent" << std::endl;
-
-    // Close the socket
-    socket.shutdown();
+    io_service.run();
 
     return 0;
 }
