@@ -18,11 +18,21 @@ int main() {
     ssl::context ctx(ssl::context::sslv23);
 
     // Load the certificate and private key files
-    const std::string certificateFile = "/home/paul/.ssl/eb_receiver_certificate.pem";
-    const std::string privateKeyFile = "/home/paul/.ssl/eb_receiver_private_key.pem";
+    const char* receiverCertificateData = std::getenv("EB_RECEIVER_CERTIFICATE_DATA");
+    const char* receiverPrivateKeyData = std::getenv("EB_RECEIVER_PRIVATE_KEY_DATA");
 
-    ctx.use_certificate_file(certificateFile, ssl::context::pem);
-    ctx.use_private_key_file(privateKeyFile, ssl::context::pem);
+    if (!receiverCertificateData || !receiverPrivateKeyData) {
+        std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
+        return 1;
+    }
+    else
+    {
+        printf("length of receiverCertificateData = %lu\n", strlen(receiverCertificateData));
+        printf("length of receiverPrivateKeyData = %lu\n", strlen(receiverPrivateKeyData));
+    }
+
+    ctx.use_certificate(asio::buffer(receiverCertificateData, std::strlen(receiverCertificateData)), ssl::context::pem);
+    ctx.use_private_key(asio::buffer(receiverPrivateKeyData, std::strlen(receiverPrivateKeyData)), ssl::context::pem);
     
     
 
