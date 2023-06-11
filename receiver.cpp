@@ -117,9 +117,13 @@ std::string Receiver::receive()
 {
     tcp::endpoint endpoint(asio::ip::address::from_string(ip_), std::stoi(port_));
     tcp::acceptor acceptor(ioService_, endpoint);
-    tcp::socket socket_(ioService_);
-    acceptor.accept(socket_);
-    ssl::stream<tcp::socket> sslSocket(std::move(socket), ctx_);
+    
+    // Create a plain socket to accept the connection
+    tcp::socket plainSocket(ioService_);
+    acceptor.accept(plainSocket);
+    
+    // Wrap the plain socket with SSL
+    socket_.lowest_layer() = std::move(plainSocket);
     socket_.handshake(ssl::stream_base::server);
 
     boost::system::error_code error;
