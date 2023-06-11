@@ -1,6 +1,3 @@
-// Simple asynchronous sender program using Boost.Asio library with encryption
-// C++ version 14
-
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
@@ -13,116 +10,129 @@ using tcp = asio::ip::tcp;
 class Sender
 {
 private:
-    // Member variables and private methods...
+    asio::io_service ioService_;
+    ssl::context ctx_;
+    ssl::stream<tcp::socket> socket_;
 
     std::string certificateEnvName_;
     std::string privateKeyEnvName_;
     std::string ip_;
     std::string port_;
 
-    std::string getEnvVariable(const std::string &name) const
-    {
-        const char *value = std::getenv(name.c_str());
-        if (!value)
-        {
-            throw std::runtime_error(name + " environment variable not provided.");
-        }
-        return value;
-    }
-
-    void handleConnect(const boost::system::error_code &error)
-    {
-        if (!error)
-        {
-            std::cout << "Connected to the receiver" << std::endl;
-        }
-        else
-        {
-            std::cout << "Connect error: " << error.message() << std::endl;
-        }
-    }
-
-    void handleWrite(const boost::system::error_code &error, size_t bytesTransferred)
-    {
-        if (!error)
-        {
-            std::cout << "Message sent" << std::endl;
-        }
-        else
-        {
-            std::cout << "Write error: " << error.message() << std::endl;
-        }
-    }
+    void handleConnect(const boost::system::error_code &error);
+    void handleWrite(const boost::system::error_code &error, size_t bytesTransferred);
+    std::string getEnvVariable(const std::string &name) const;
 
 public:
-    Sender &set_certificate(const std::string &certificateEnvName)
+    Sender()
+        : ioService_(), 
+        ctx_(ssl::context::sslv23), 
+        socket_(ioService_, ctx_)
     {
-        certificateEnvName_ = certificateEnvName;
-        return *this;
     }
 
-    Sender &set_private_key(const std::string &privateKeyEnvName)
-    {
-        privateKeyEnvName_ = privateKeyEnvName;
-        return *this;
-    }
-
-    Sender &set_IP(const std::string &ip)
-    {
-        ip_ = ip;
-        return *this;
-    }
-
-    Sender &set_port(const std::string &port)
-    {
-        port_ = port;
-        return *this;
-    }
-
-    void send(const std::string &data)
-    {
-
-        asio::io_service ioService_;
-        ssl::context ctx_(ssl::context::sslv23);
-
-        ctx_.use_certificate(asio::buffer(getEnvVariable(certificateEnvName_)), ssl::context::pem);
-        ctx_.use_private_key(asio::buffer(getEnvVariable(privateKeyEnvName_)), ssl::context::pem);
-
-        ssl::stream<tcp::socket> socket_(ioService_, ctx_);
-
-        tcp::resolver resolver(ioService_);
-        tcp::resolver::query query(ip_, port_);
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-        asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
-                            [this, data, &socket_](const boost::system::error_code &error, const tcp::resolver::iterator &endpoint_iterator)
-                            {
-                                handleConnect(error);
-                                if (!error)
-                                {
-                                    socket_.async_handshake(ssl::stream_base::client,
-                                                            [this, data, &socket_](const boost::system::error_code &error)
-                                                            {
-                                                                if (!error)
-                                                                {
-                                                                    asio::async_write(socket_, asio::buffer(data),
-                                                                                      [this, &socket_](const boost::system::error_code &error, size_t bytesTransferred)
-                                                                                      {
-                                                                                          handleWrite(error, bytesTransferred);
-                                                                                          socket_.shutdown();
-                                                                                      });
-                                                                }
-                                                                else
-                                                                {
-                                                                    std::cout << "Handshake error: " << error.message() << std::endl;
-                                                                }
-                                                            });
-                                }
-                            });
-
-        ioService_.run();
-    }
+    Sender &set_certificate(const std::string &certificateEnvName);
+    Sender &set_private_key(const std::string &privateKeyEnvName);
+    Sender &set_IP(const std::string &ip);
+    Sender &set_port(const std::string &port);
+    void send(const std::string &data);
 };
+
+void Sender::handleConnect(const boost::system::error_code &error)
+{
+    if (!error)
+    {
+        std::cout << "Connected to the receiver" << std::endl;
+    }
+    else
+    {
+        std::cout << "Connect error: " << error.message() << std::endl;
+    }
+}
+
+void Sender::handleWrite(const boost::system::error_code &error, size_t bytesTransferred)
+{
+    if (!error)
+    {
+        std::cout << "Message sent" << std::endl;
+    }
+    else
+    {
+        std::cout << "Write error: " << error.message() << std::endl;
+    }
+}
+
+std::string Sender::getEnvVariable(const std::string &name) const
+{
+    const char *value = std::getenv(name.c_str());
+    if (!value)
+    {
+        throw std::runtime_error(name + " environment variable not provided.");
+    }
+    return value;
+}
+
+Sender &Sender::set_certificate(const std::string &certificateEnvName)
+{
+    certificateEnvName_ = certificateEnvName;
+    return *this;
+}
+
+Sender &Sender::set_private_key(const std::string &privateKeyEnvName)
+{
+    privateKeyEnvName_ = privateKeyEnvName;
+    return *this;
+}
+
+Sender &Sender::set_IP(const std::string &ip)
+{
+    ip_ = ip;
+    return *this;
+}
+
+Sender &Sender::set_port(const std::string &port)
+{
+    port_ = port;
+    return *this;
+}
+
+void Sender::send(const std::string &data)
+{
+    ctx_.use_certificate(asio::buffer(getEnvVariable(certificateEnvName_)), ssl::context::pem);
+    ctx_.use_private_key(asio::buffer(getEnvVariable(privateKeyEnvName_)), ssl::context::pem);
+
+    tcp::resolver resolver(ioService_);
+    tcp::resolver::query query(ip_, port_);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+    asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
+        [this, data](const boost::system::error_code &error, const tcp::resolver::iterator &endpoint_iterator)
+        {
+            handleConnect(error);
+            if (!error)
+            {
+                socket_.async_handshake(ssl::stream_base::client,
+                    [this, data](const boost::system::error_code &error)
+                    {
+                        if (!error)
+                        {
+                            asio::async_write(socket_, asio::buffer(data),
+                                [this](const boost::system::error_code &error, size_t bytesTransferred)
+                                {
+                                    handleWrite(error, bytesTransferred);
+                                    socket_.shutdown();
+                                });
+                        }
+                        else
+                        {
+                            std::cout << "Handshake error: " << error.message() << std::endl;
+                        }
+                    });
+            }
+        });
+
+    ioService_.run();
+}
 
 int main()
 {

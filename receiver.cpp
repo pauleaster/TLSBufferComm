@@ -1,8 +1,6 @@
-// Simple receiver program using Boost.Asio library with encryption
-// C++ version 14
-
 #include <iostream>
 #include <array>
+#include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
@@ -10,45 +8,121 @@ namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
 
-const std::string receiverIP = "127.0.0.1"; // Use the loopback address (localhost)
-const unsigned short port = 1234;
-
-int main()
+class Receiver
 {
-    asio::io_service io_service;
-    ssl::context ctx(ssl::context::sslv23);
+private:
+    asio::io_service ioService_;
+    ssl::context ctx_;
+    ssl::stream<tcp::socket> socket_;
+    std::array<char, 128> buffer_;
 
-    // Load the certificate and private key files
-    const char *receiverCertificateData = std::getenv("EB_RECEIVER_CERTIFICATE_DATA");
-    const char *receiverPrivateKeyData = std::getenv("EB_RECEIVER_PRIVATE_KEY_DATA");
+    std::string certificateEnvName_;
+    std::string privateKeyEnvName_;
+    std::string ip_;
+    std::string port_;
 
-    if (!receiverCertificateData || !receiverPrivateKeyData)
+    std::string getEnvVariable(const std::string &name) const;
+
+    void handleAccept(const boost::system::error_code &error);
+    void handleRead(const boost::system::error_code &error, size_t bytesRead);
+
+public:
+    Receiver()
+        : ioService_(), ctx_(ssl::context::sslv23), socket_(ioService_, ctx_), buffer_()
     {
-        std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
-        return 1;
+    }
+
+    Receiver &set_certificate(const std::string &certificateEnvName);
+    Receiver &set_private_key(const std::string &privateKeyEnvName);
+    Receiver &set_IP(const std::string &ip);
+    Receiver &set_port(const std::string &port);
+    std::string receive();
+};
+
+std::string Receiver::getEnvVariable(const std::string &name) const
+{
+    const char *value = std::getenv(name.c_str());
+    if (!value)
+    {
+        throw std::runtime_error(name + " environment variable not provided.");
+    }
+    return value;
+}
+
+void Receiver::handleAccept(const boost::system::error_code &error)
+{
+    if (!error)
+    {
+        std::cout << "Accepted a connection" << std::endl;
+        socket_.async_handshake(ssl::stream_base::server,
+            [this](const boost::system::error_code &error) {
+                if (!error)
+                {
+                    socket_.async_read_some(asio::buffer(buffer_),
+                        [this](const boost::system::error_code &error, size_t bytesRead) {
+                            handleRead(error, bytesRead);
+                            socket_.shutdown();
+                        });
+                }
+                else
+                {
+                    std::cout << "Handshake error: " << error.message() << std::endl;
+                }
+            });
     }
     else
     {
-        printf("length of receiverCertificateData = %lu\n", strlen(receiverCertificateData));
-        printf("length of receiverPrivateKeyData = %lu\n", strlen(receiverPrivateKeyData));
+        std::cout << "Accept error: " << error.message() << std::endl;
     }
+}
 
-    ctx.use_certificate(asio::buffer(receiverCertificateData, std::strlen(receiverCertificateData)), ssl::context::pem);
-    ctx.use_private_key(asio::buffer(receiverPrivateKeyData, std::strlen(receiverPrivateKeyData)), ssl::context::pem);
+void Receiver::handleRead(const boost::system::error_code &error, size_t bytesRead)
+{
+    if (!error)
+    {
+        std::cout << "Received " << bytesRead << " bytes" << std::endl;
+        std::cout << "Message: " << std::string(buffer_.data(), bytesRead) << std::endl;
+    }
+    else
+    {
+        std::cout << "Read error: " << error.message() << std::endl;
+    }
+}
 
-    tcp::endpoint endpoint(asio::ip::address::from_string(receiverIP), port);
-    tcp::acceptor acceptor(io_service, endpoint);
-    tcp::socket socket(io_service);
-    acceptor.accept(socket);
+Receiver &Receiver::set_certificate(const std::string &certificateEnvName)
+{
+    certificateEnvName_ = certificateEnvName;
+    return *this;
+}
 
-    ssl::stream<tcp::socket> sslSocket(std::move(socket), ctx);
-    sslSocket.handshake(ssl::stream_base::server);
+Receiver &Receiver::set_private_key(const std::string &privateKeyEnvName)
+{
+    privateKeyEnvName_ = privateKeyEnvName;
+    return *this;
+}
 
-    // Receive data
-    std::array<char, 128> buffer;
+Receiver &Receiver::set_IP(const std::string &ip)
+{
+    ip_ = ip;
+    return *this;
+}
+
+Receiver &Receiver::set_port(const std::string &port)
+{
+    port_ = port;
+    return *this;
+}
+
+std::string Receiver::receive()
+{
+    tcp::endpoint endpoint(asio::ip::address::from_string(ip_), std::stoi(port_));
+    tcp::acceptor acceptor(ioService_, endpoint);
+    acceptor.accept(socket_);
+
+    socket_.handshake(ssl::stream_base::server);
+
     boost::system::error_code error;
-    size_t bytesRead = sslSocket.read_some(boost::asio::buffer(buffer), error);
-    io_service.run();
+    size_t bytesRead = socket_.read_some(boost::asio::buffer(buffer_), error);
 
     if (error == boost::asio::error::eof)
     {
@@ -61,11 +135,33 @@ int main()
     else
     {
         std::cout << "Received " << bytesRead << " bytes" << std::endl;
-        std::cout << "Message: " << std::string(buffer.data(), bytesRead) << std::endl;
+        std::cout << "Message: " << std::string(buffer_.data(), bytesRead) << std::endl;
     }
 
-    // Close the socket
-    sslSocket.shutdown();
+    socket_.shutdown();
+
+    return std::string(buffer_.data(), bytesRead);
+}
+
+
+
+int main()
+{
+    try
+    {
+        Receiver receiver;
+        std::string data = receiver.set_certificate("EB_RECEIVER_CERTIFICATE_DATA")
+                                 .set_private_key("EB_RECEIVER_PRIVATE_KEY_DATA")
+                                 .set_IP("127.0.0.1")
+                                 .set_port("1234")
+                                 .receive();
+        std::cout << "Received data: " << data << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }
