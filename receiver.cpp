@@ -119,7 +119,7 @@ std::string Receiver::receive()
     tcp::acceptor acceptor(ioService_, endpoint);
     tcp::socket socket_(ioService_);
     acceptor.accept(socket_);
-
+    ssl::stream<tcp::socket> sslSocket(std::move(socket), ctx_);
     socket_.handshake(ssl::stream_base::server);
 
     boost::system::error_code error;
