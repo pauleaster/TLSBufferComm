@@ -10,18 +10,20 @@ namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
 
-const std::string receiverIP = "127.0.0.1";  // Use the loopback address (localhost)
+const std::string receiverIP = "127.0.0.1"; // Use the loopback address (localhost)
 const unsigned short port = 1234;
 
-int main() {
+int main()
+{
     asio::io_service io_service;
     ssl::context ctx(ssl::context::sslv23);
 
     // Load the certificate and private key files
-    const char* receiverCertificateData = std::getenv("EB_RECEIVER_CERTIFICATE_DATA");
-    const char* receiverPrivateKeyData = std::getenv("EB_RECEIVER_PRIVATE_KEY_DATA");
+    const char *receiverCertificateData = std::getenv("EB_RECEIVER_CERTIFICATE_DATA");
+    const char *receiverPrivateKeyData = std::getenv("EB_RECEIVER_PRIVATE_KEY_DATA");
 
-    if (!receiverCertificateData || !receiverPrivateKeyData) {
+    if (!receiverCertificateData || !receiverPrivateKeyData)
+    {
         std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
         return 1;
     }
@@ -33,9 +35,6 @@ int main() {
 
     ctx.use_certificate(asio::buffer(receiverCertificateData, std::strlen(receiverCertificateData)), ssl::context::pem);
     ctx.use_private_key(asio::buffer(receiverPrivateKeyData, std::strlen(receiverPrivateKeyData)), ssl::context::pem);
-    
-    
-
 
     tcp::endpoint endpoint(asio::ip::address::from_string(receiverIP), port);
     tcp::acceptor acceptor(io_service, endpoint);
@@ -51,11 +50,16 @@ int main() {
     size_t bytesRead = sslSocket.read_some(boost::asio::buffer(buffer), error);
     io_service.run();
 
-    if (error == boost::asio::error::eof) {
+    if (error == boost::asio::error::eof)
+    {
         std::cout << "Connection closed by peer" << std::endl;
-    } else if (error) {
+    }
+    else if (error)
+    {
         std::cout << "Error: " << error.message() << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "Received " << bytesRead << " bytes" << std::endl;
         std::cout << "Message: " << std::string(buffer.data(), bytesRead) << std::endl;
     }

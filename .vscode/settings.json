@@ -1,0 +1,10 @@
+{
+    "editor.tabSize": 2,
+    "[cpp]": {
+      "editor.tabSize": 2
+    },
+    "[hpp]": {
+      "editor.tabSize": 2
+    }
+  }
+  
