@@ -117,6 +117,7 @@ std::string Receiver::receive()
 {
     tcp::endpoint endpoint(asio::ip::address::from_string(ip_), std::stoi(port_));
     tcp::acceptor acceptor(ioService_, endpoint);
+    tcp::socket socket_(ioService_);
     acceptor.accept(socket_);
 
     socket_.handshake(ssl::stream_base::server);
