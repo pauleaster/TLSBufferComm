@@ -1,21 +1,15 @@
-#include <iostream>
+#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 2
 #include "receiver.cpp"
 
+const std::string certificateEnvVar = "EB_RECEIVER_CERTIFICATE_DATA";
+const std::string privateKeyEnvVar = "EB_RECEIVER_PRIVATE_KEY_DATA";
+
 int main() {
-    std::string certificateEnvVar = "EB_RECEIVER_CERTIFICATE_DATA";
-    std::string privateKeyEnvVar = "EB_RECEIVER_PRIVATE_KEY_DATA";
 
-    try {
-        Receiver receiver(certificateEnvVar, privateKeyEnvVar);
-        receiver.connect();
-
-        std::string msg1 = receiver.receive();
-        std::cout << "Received message: " << msg1 << std::endl;
-        receiver.disconnect();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-        return 1;
-    }
+    Receiver receiver(certificateEnvVar, privateKeyEnvVar);
+    receiver.connect("127.0.0.1", 1234);
+    std::string msg = receiver.receive();
+    receiver.disconnect();
 
     return 0;
 }

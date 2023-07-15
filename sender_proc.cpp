@@ -27,7 +27,7 @@ void handleWrite(const boost::system::error_code& error, size_t bytesTransferred
 }
 
 int main() {
-    asio::io_service io_service;
+    asio::io_context io_context;
     ssl::context ctx(ssl::context::sslv23);
 
     // Load the certificate and private key files
@@ -43,10 +43,10 @@ ctx.use_certificate(asio::buffer(senderCertificateData, std::strlen(senderCertif
 ctx.use_private_key(asio::buffer(senderPrivateKeyData, std::strlen(senderPrivateKeyData)), ssl::context::pem);
 
 
-    ssl::stream<tcp::socket> socket(io_service, ctx);
+    ssl::stream<tcp::socket> socket(io_context, ctx);
 
     // Connect to the receiver
-    tcp::resolver resolver(io_service);
+    tcp::resolver resolver(io_context);
     tcp::resolver::query query("127.0.0.1", "1234");
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
@@ -77,7 +77,7 @@ ctx.use_private_key(asio::buffer(senderPrivateKeyData, std::strlen(senderPrivate
             }
         });
 
-    io_service.run();
+    io_context.run();
 
     return 0;
 }

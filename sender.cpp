@@ -1,3 +1,4 @@
+#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 2
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
@@ -11,8 +12,9 @@ class Sender
 {
 public:
     Sender(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
-        : ctx_(ssl::context::sslv23),
-          socket_(io_service_, ctx_),
+        : io_context_(),
+          ctx_(ssl::context::sslv23_client),
+          socket_(io_context_, ctx_),
           connected_(false)
     {
         const char *certificateData = std::getenv(certificateEnvVar.c_str());
@@ -24,11 +26,32 @@ public:
             throw std::runtime_error("Certificate or private key data missing.");
         }
 
-        ctx_.use_certificate(asio::buffer(certificateData, std::strlen(certificateData)), ssl::context::pem);
-        ctx_.use_private_key(asio::buffer(privateKeyData, std::strlen(privateKeyData)), ssl::context::pem);
+        ctx_.use_certificate(asio::buffer(certificateData, std::strlen(certificateData)),
+                             ssl::context::pem,
+                             certificateError);
+        ctx_.use_private_key(asio::buffer(privateKeyData, std::strlen(privateKeyData)),
+                             ssl::context::pem,
+                             privateKeyError);
+        // Set the certificate verification mode to SSL_VERIFY_PEER,
+        // which means the client will verify the server's certificate.
+        ctx_.set_verify_mode(ssl::verify_peer);
+        if (certificateError)
+        {
+            auto certificateError_ = certificateError.message();
+            std::cout << "Failed to load the certificate: " << certificateError_ << std::endl;
+        }
+
+        if (privateKeyError)
+        {
+            auto privateKeyError_ = privateKeyError.message();
+            std::cout << "Failed to load the private key: " << privateKeyError_ << std::endl;
+        }
+        std::cout << "Initialisation: Checking Certificate and Private Key strings..." << std::endl;
+        checkCertificate();
+        checkPrivateKey();
     }
 
-    void connect()
+    void connect(const std::string &receiverIP, unsigned short port)
     {
         if (connected_)
         {
@@ -36,8 +59,8 @@ public:
             return;
         }
 
-        tcp::resolver resolver(io_service_);
-        tcp::resolver::query query("127.0.0.1", "1234");
+        tcp::resolver resolver(io_context_);
+        tcp::resolver::query query(receiverIP, std::to_string(port));
         tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
         asio::async_connect(
@@ -65,7 +88,7 @@ public:
                 }
             });
 
-        io_service_.run();
+        io_context_.run();
     }
 
     void send(const std::string &message)
@@ -99,7 +122,6 @@ public:
     }
 
 private:
-    bool connected_;
     void handleConnect(const boost::system::error_code &error)
     {
         if (!error)
@@ -124,7 +146,90 @@ private:
         }
     }
 
-    asio::io_service io_service_;
+    asio::io_context io_context_;
     ssl::context ctx_;
     ssl::stream<tcp::socket> socket_;
+    bool connected_;
+    boost::system::error_code certificateError;
+    boost::system::error_code privateKeyError;
+    boost::system::error_code handshakeError;
+
+    void checkCertificate()
+    {
+        // Check the certificate status
+        long verifyMode = SSL_CTX_get_verify_mode(ctx_.native_handle());
+        if (verifyMode & SSL_VERIFY_PEER)
+        {
+            std::cout << "Certificate verification is enabled" << std::endl;
+        }
+        else
+        {
+            std::cout << "Certificate verification is disabled" << std::endl;
+        }
+
+        // use SSL_CTX_get0_certificate to get certificate from ctx_
+        X509 *certificate = SSL_CTX_get0_certificate(ctx_.native_handle());
+        if (certificate != nullptr)
+        {
+            std::cout << "Certificate is available" << std::endl;
+            // convert X509 to string
+            std::string certificateString;
+            BIO *bio = BIO_new(BIO_s_mem());
+            if (bio != nullptr)
+            {
+                if (PEM_write_bio_X509(bio, certificate) == 1)
+                {
+                    char buffer[1024];
+                    int bytesRead;
+                    while ((bytesRead = BIO_read(bio, buffer, sizeof(buffer))) > 0)
+                    {
+                        certificateString.append(buffer, bytesRead);
+                    }
+                }
+            }
+            BIO_free_all(bio);
+            // Output the certificate string
+            std::cout << "Certificate: \n"
+                      << certificateString.substr(28, 28 + 10) << std::endl;
+        }
+        else
+        {
+            std::cout << "Certificate is not available" << std::endl;
+        }
+    }
+
+    void checkPrivateKey()
+    {
+        // Use SSL_CTX_get0_privatekey to get the private key from ctx_
+        EVP_PKEY *privateKey = SSL_CTX_get0_privatekey(ctx_.native_handle());
+        if (privateKey != nullptr)
+        {
+            std::cout << "Private key is available" << std::endl;
+
+            // Convert EVP_PKEY to string
+            std::string privateKeyString;
+            BIO *bio = BIO_new(BIO_s_mem());
+            if (bio != nullptr)
+            {
+                if (PEM_write_bio_PrivateKey(bio, privateKey, nullptr, nullptr, 0, nullptr, nullptr) == 1)
+                {
+                    char buffer[1024];
+                    int bytesRead;
+                    while ((bytesRead = BIO_read(bio, buffer, sizeof(buffer))) > 0)
+                    {
+                        privateKeyString.append(buffer, bytesRead);
+                    }
+                }
+                BIO_free_all(bio);
+            }
+
+            // Output the private key string
+            std::cout << "Private key: \n"
+                      << privateKeyString.substr(28, 28 + 10) << std::endl;
+        }
+        else
+        {
+            std::cout << "Private key is not available" << std::endl;
+        }
+    }
 };

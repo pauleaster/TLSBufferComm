@@ -6,12 +6,13 @@
         "type": "shell",
         "command": "g++",
         "args": [
-          "-std=c++14",
+          "-std=c++20",
           "-I",
           "/usr/local/include/boost",
           "-L",
           "/usr/local/lib",
           "-ftrack-macro-expansion=0","-ftrack-macro-expansion=0",
+          "${workspaceFolder}/sender_main.cpp",
           "${workspaceFolder}/sender.cpp",
           "-o",
           "${workspaceFolder}/sender",
@@ -29,15 +30,62 @@
         "type": "shell",
         "command": "g++",
         "args": [
-          "-std=c++14","-ftrack-macro-expansion=0",
+          "-std=c++20","-ftrack-macro-expansion=0",
           "-I",
           "/usr/local/include/boost",
           "-L",
           "/usr/local/lib",
           "-ftrack-macro-expansion=0",
+          "${workspaceFolder}/receiver_main.cpp",
           "${workspaceFolder}/receiver.cpp",
           "-o",
           "${workspaceFolder}/receiver",
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "build_receiver_proc",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-std=c++20","-ftrack-macro-expansion=0",
+          "-I",
+          "/usr/local/include/boost",
+          "-L",
+          "/usr/local/lib",
+          "-ftrack-macro-expansion=0",
+          "${workspaceFolder}/receiver_proc.cpp",
+          "-o",
+          "${workspaceFolder}/receiver_proc",
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "build_sender_proc",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-std=c++20","-ftrack-macro-expansion=0",
+          "-I",
+          "/usr/local/include/boost",
+          "-L",
+          "/usr/local/lib",
+          "-ftrack-macro-expansion=0",
+          "${workspaceFolder}/sender_proc.cpp",
+          "-o",
+          "${workspaceFolder}/sender_proc",
           "-lboost_system",
           "-lssl",
           "-lcrypto"
