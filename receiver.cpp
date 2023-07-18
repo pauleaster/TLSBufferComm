@@ -35,20 +35,15 @@ Receiver::Receiver(const std::string &certificateEnvVar, const std::string &priv
     ctx.use_private_key(asio::buffer(privateKeyData, privateKeyData.size()), ssl::context::pem);
 }
 
-void Receiver::initialiseSSL()
+std::string Receiver::getEnvVariable(const std::string &varName)
 {
-    sslSocket.emplace(std::move(*socket), ctx);
-}
+    char *value = std::getenv(varName.c_str());
 
-std::string Receiver::run()
-{
-    startListening();
-    acceptConnection();
-    initialiseSSL();
-    doHandshake();
-    msg = receiveData();
-    closeSocket();
-    return msg;
+    // // Debug output
+    // std::cout << "Environment variable name: \n" << varName << "\n" << std::endl;
+    // std::cout << "Environment variable value: \n" << (value ? value : "(null)") << "\n" << std::endl;
+
+    return value ? value : "";
 }
 
 void Receiver::startListening()
@@ -64,7 +59,7 @@ void Receiver::startListening()
 
     // Set the SO_REUSEADDR option before binding the acceptor
     acceptor.set_option(asio::socket_base::reuse_address(true));
-    
+
     acceptor.bind(endpoint, error);
     if (error)
     {
@@ -88,6 +83,11 @@ void Receiver::acceptConnection()
         std::cout << "Failed to accept connection: " << error.message() << std::endl;
         return;
     }
+}
+
+void Receiver::initialiseSSL()
+{
+    sslSocket.emplace(std::move(*socket), ctx);
 }
 
 void Receiver::doHandshake()
@@ -121,18 +121,17 @@ std::string Receiver::receiveData()
     if (error == boost::asio::error::eof)
     {
         std::cout << "Connection closed by peer" << std::endl;
-        return("");
+        return ("");
     }
     else if (error)
     {
         std::cout << "Error: " << error.message() << std::endl;
-        return("");
+        return ("");
     }
     else
     {
         return (std::string(buffer.data(), bytesRead));
     }
-    
 }
 
 void Receiver::closeSocket()
@@ -157,13 +156,13 @@ void Receiver::closeSocket()
     }
 }
 
-std::string Receiver::getEnvVariable(const std::string &varName)
+std::string Receiver::run()
 {
-    char *value = std::getenv(varName.c_str());
-
-    // // Debug output
-    // std::cout << "Environment variable name: \n" << varName << "\n" << std::endl;
-    // std::cout << "Environment variable value: \n" << (value ? value : "(null)") << "\n" << std::endl;
-
-    return value ? value : "";
+    startListening();
+    acceptConnection();
+    initialiseSSL();
+    doHandshake();
+    msg = receiveData();
+    closeSocket();
+    return msg;
 }
