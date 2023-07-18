@@ -40,76 +40,114 @@ void Receiver::initialiseSSL()
     sslSocket.emplace(std::move(*socket), ctx);
 }
 
-void Receiver::run()
+std::string Receiver::run()
 {
+    startListening();
+    acceptConnection();
+    initialiseSSL();
+    doHandshake();
+    msg = receiveData();
+    closeSocket();
+    return msg;
+}
 
+void Receiver::startListening()
+{
     endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP), port);
 
-    boost::system::error_code ec;
-    acceptor.open(endpoint.protocol(), ec);
-    if (ec)
+    acceptor.open(endpoint.protocol(), error);
+    if (error)
     {
-        std::cout << "Failed to open acceptor: " << ec.message() << std::endl;
+        std::cout << "Failed to open acceptor: " << error.message() << std::endl;
         return;
     }
-    acceptor.bind(endpoint, ec);
-    if (ec)
+
+    // Set the SO_REUSEADDR option before binding the acceptor
+    acceptor.set_option(asio::socket_base::reuse_address(true));
+    
+    acceptor.bind(endpoint, error);
+    if (error)
     {
-        std::cout << "Failed to bind acceptor: " << ec.message() << std::endl;
+        std::cout << "Failed to bind acceptor: " << error.message() << std::endl;
         return;
     }
-    acceptor.listen(asio::socket_base::max_listen_connections, ec);
-    if (ec)
+    acceptor.listen(asio::socket_base::max_listen_connections, error);
+    if (error)
     {
-        std::cout << "Failed to listen on acceptor: " << ec.message() << std::endl;
+        std::cout << "Failed to listen on acceptor: " << error.message() << std::endl;
         return;
     }
     std::cout << "Listening on acceptor." << std::endl;
+}
 
-    acceptor.accept(*socket, ec);
-    if (ec)
+void Receiver::acceptConnection()
+{
+    acceptor.accept(*socket, error);
+    if (error)
     {
-        std::cout << "Failed to accept connection: " << ec.message() << std::endl;
+        std::cout << "Failed to accept connection: " << error.message() << std::endl;
         return;
     }
+}
 
-    // Initialize the SSL socket after acceptor.accept()
-    initialiseSSL();
+void Receiver::doHandshake()
+{
 
     // Check SSL socket before handshaking
     if (sslSocket)
     {
-        sslSocket->handshake(ssl::stream_base::server, ec);
-        if (ec)
+        sslSocket->handshake(ssl::stream_base::server, error);
+        if (error)
         {
-            std::cout << "Handshake failed: " << ec.message() << std::endl;
+            std::cout << "Handshake failed: " << error.message() << std::endl;
             return;
         }
         std::cout << "Handshake completed." << std::endl;
+    }
+    else
+    {
+        std::cout << "SSL socket not initialized." << std::endl;
+        return;
+    }
+}
 
-        // Receive data
-        bytesRead = sslSocket->read_some(boost::asio::buffer(buffer), error);
-        io_context.run();
+std::string Receiver::receiveData()
+{
+    // Receive data
+    std::cout << "Receiving data..." << std::endl;
+    bytesRead = sslSocket->read_some(boost::asio::buffer(buffer), error);
+    io_context.run();
 
-        if (error == boost::asio::error::eof)
-        {
-            std::cout << "Connection closed by peer" << std::endl;
-        }
-        else if (error)
-        {
-            std::cout << "Error: " << error.message() << std::endl;
-        }
-        else
-        {
-            std::cout << "Received " << bytesRead << " bytes" << std::endl;
-            std::cout << "Message: " << std::string(buffer.data(), bytesRead) << std::endl;
-        }
+    if (error == boost::asio::error::eof)
+    {
+        std::cout << "Connection closed by peer" << std::endl;
+        return("");
+    }
+    else if (error)
+    {
+        std::cout << "Error: " << error.message() << std::endl;
+        return("");
+    }
+    else
+    {
+        return (std::string(buffer.data(), bytesRead));
+    }
+    
+}
+
+void Receiver::closeSocket()
+{
+    // Check SSL socket before closing
+    std::cout << "Closing socket..." << std::endl;
+    if (sslSocket)
+    {
 
         // Close the socket
-        sslSocket->shutdown(ec);
-        if (ec)
+        std::cout << "Shutting down SSL socket..." << std::endl;
+        sslSocket->shutdown(error);
+        if (error)
         {
-            std::cout << "Failed to shutdown SSL socket: " << ec.message() << std::endl;
+            std::cout << "Failed to shutdown SSL socket: " << error.message() << std::endl;
             return;
         }
     }

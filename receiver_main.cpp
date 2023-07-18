@@ -6,7 +6,8 @@ int main()
     const std::string privateKeyEnvVar = "EB_RECEIVER_PRIVATE_KEY_DATA";
 
     Receiver rv(certificateEnvVar, privateKeyEnvVar);
-    rv.run();
+    std::string message = rv.run();
+    std::cout << "Received message: \n\"" << message << "\"\n" << std::endl;
 
     return 0;
 }
