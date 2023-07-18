@@ -15,7 +15,7 @@ using tcp = asio::ip::tcp;
 class Receiver
 {
 public:
-  Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar);
+  Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string receiverIP, const unsigned short port);
 
   std::string run();
   void startListening();
@@ -38,6 +38,8 @@ private:
   boost::system::error_code error;
   size_t bytesRead;
   std::string msg;
+  std::string receiverIP_;
+  unsigned short port_;
 
   std::string getEnvVariable(const std::string &varName);
 };

@@ -1,10 +1,7 @@
 // receiver.cpp
 #include "receiver.hpp"
 
-const std::string receiverIP = "127.0.0.1"; // Use the loopback address (localhost)
-const unsigned short port = 4321;
-
-Receiver::Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
+Receiver::Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string receiverIP, const unsigned short port)
     : io_context(),
       ctx(ssl::context::sslv23),
       endpoint(),
@@ -17,6 +14,8 @@ Receiver::Receiver(const std::string &certificateEnvVar, const std::string &priv
       privateKeyData(),
       sslSocket() // Initialize sslSocket as empty (std::nullopt)
 {
+    receiverIP_ = receiverIP;
+    port_ = port;
     certificateData = getEnvVariable(certificateEnvVar);
     privateKeyData = getEnvVariable(privateKeyEnvVar);
 
@@ -48,7 +47,7 @@ std::string Receiver::getEnvVariable(const std::string &varName)
 
 void Receiver::startListening()
 {
-    endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP), port);
+    endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP_), port_);
 
     acceptor.open(endpoint.protocol(), error);
     if (error)
@@ -72,7 +71,8 @@ void Receiver::startListening()
         std::cout << "Failed to listen on acceptor: " << error.message() << std::endl;
         return;
     }
-    std::cout << "Listening on acceptor." << std::endl;
+    // output listening message with IP address and port
+    std::cout << "Listening on " << receiverIP_ << ":" << port_ << std::endl;
 }
 
 void Receiver::acceptConnection()
