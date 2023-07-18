@@ -73,6 +73,29 @@
         }
       },
       {
+        "label": "build_receiver_proc2",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-std=c++20","-ftrack-macro-expansion=0",
+          "-I",
+          "/usr/local/include/boost",
+          "-L",
+          "/usr/local/lib",
+          "-ftrack-macro-expansion=0",
+          "${workspaceFolder}/receiver_proc2.cpp",
+          "-o",
+          "${workspaceFolder}/receiver_proc2",
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
         "label": "build_sender_proc",
         "type": "shell",
         "command": "g++",
@@ -86,6 +109,29 @@
           "${workspaceFolder}/sender_proc.cpp",
           "-o",
           "${workspaceFolder}/sender_proc",
+          "-lboost_system",
+          "-lssl",
+          "-lcrypto"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "build_sender_proc2",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-std=c++20","-ftrack-macro-expansion=0",
+          "-I",
+          "/usr/local/include/boost",
+          "-L",
+          "/usr/local/lib",
+          "-ftrack-macro-expansion=0",
+          "${workspaceFolder}/sender_proc2.cpp",
+          "-o",
+          "${workspaceFolder}/sender_proc2",
           "-lboost_system",
           "-lssl",
           "-lcrypto"

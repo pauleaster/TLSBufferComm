@@ -1,6 +1,7 @@
 // Simple receiver program using Boost.Asio library with encryption
-// C++ version 14
+// C++ version 20
 
+#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 2
 #include <iostream>
 #include <array>
 #include <boost/asio.hpp>
@@ -11,7 +12,7 @@ namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
 
 const std::string receiverIP = "127.0.0.1";  // Use the loopback address (localhost)
-const unsigned short port = 1234;
+const unsigned short port = 4321;
 
 int main() {
     asio::io_context io_context;
@@ -39,10 +40,12 @@ int main() {
 
     tcp::endpoint endpoint(asio::ip::address::from_string(receiverIP), port);
     tcp::acceptor acceptor(io_context, endpoint);
-    tcp::socket socket(io_context);
-    acceptor.accept(socket);
 
-    ssl::stream<tcp::socket> sslSocket(std::move(socket), ctx);
+    // Create a shared_ptr to the socket
+    auto socket = std::make_shared<tcp::socket>(io_context);
+    acceptor.accept(*socket);
+
+    ssl::stream<tcp::socket> sslSocket(std::move(*socket), ctx);
     sslSocket.handshake(ssl::stream_base::server);
 
     // Receive data
