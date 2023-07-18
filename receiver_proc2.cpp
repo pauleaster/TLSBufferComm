@@ -75,7 +75,6 @@ int main()
     rv.ctx.use_private_key(asio::buffer(rv.receiverPrivateKeyData, rv.receiverPrivateKeyData.size()), ssl::context::pem);
 
     rv.endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP), port);
-    std::cout << "Endpoint created." << std::endl;
 
     boost::system::error_code ec;
     rv.acceptor.open(rv.endpoint.protocol(), ec);
@@ -84,16 +83,12 @@ int main()
         std::cout << "Failed to open acceptor: " << ec.message() << std::endl;
         return 1;
     }
-    std::cout << "Acceptor opened." << std::endl;
-
     rv.acceptor.bind(rv.endpoint, ec);
     if (ec)
     {
         std::cout << "Failed to bind acceptor: " << ec.message() << std::endl;
         return 1;
     }
-    std::cout << "Acceptor bound." << std::endl;
-
     rv.acceptor.listen(asio::socket_base::max_listen_connections, ec);
     if (ec)
     {
@@ -108,8 +103,7 @@ int main()
         std::cout << "Failed to accept connection: " << ec.message() << std::endl;
         return 1;
     }
-    std::cout << "Accepted connection." << std::endl;
-
+    
     // Initialize the SSL socket after acceptor.accept()
     rv.initialiseSSL();
 
