@@ -1,139 +1,96 @@
-#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 2
-#include <iostream>
-#include <array>
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+// receiver.cpp
+#include "receiver.hpp"
 
-namespace asio = boost::asio;
-namespace ssl = boost::asio::ssl;
-using tcp = asio::ip::tcp;
+const std::string receiverIP = "127.0.0.1"; // Use the loopback address (localhost)
+const unsigned short port = 4321;
 
-class Receiver
+Receiver::Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
+    : io_context(),
+      ctx(ssl::context::sslv23),
+      endpoint(),
+      acceptor(io_context),
+      socket(std::make_shared<tcp::socket>(io_context)),
+      buffer(),
+      error(),
+      bytesRead(),
+      certificateData(),
+      privateKeyData(),
+      sslSocket() // Initialize sslSocket as empty (std::nullopt)
 {
-public:
-    Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
-        : io_context_(),
-          ctx_(ssl::context::sslv23_server),
-          sslSocket_(io_context_, ctx_),
-          acceptor_(io_context_),
-          connected_(false)
+    certificateData = getEnvVariable(certificateEnvVar);
+    privateKeyData = getEnvVariable(privateKeyEnvVar);
+
+    if (certificateData.empty() || privateKeyData.empty())
     {
-
-        // read certificate and private key from environment variables
-        const char *certificateData = std::getenv(certificateEnvVar.c_str());
-        const char *privateKeyData = std::getenv(privateKeyEnvVar.c_str());
-        if (!certificateData || !privateKeyData)
-        {
-            std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
-            throw std::runtime_error("Certificate or private key data missing.");
-        }
-
-        ctx_.use_certificate(asio::buffer(certificateData, std::strlen(certificateData)),
-                             ssl::context::pem,
-                             certificateError);
-        ctx_.use_private_key(asio::buffer(privateKeyData, std::strlen(privateKeyData)),
-                             ssl::context::pem,
-                             privateKeyError);
-        // Set the certificate verification mode to SSL_VERIFY_PEER,
-        // which means the client will verify the server's certificate.
-        ctx_.set_verify_mode(ssl::verify_peer);
-        if (certificateError)
-        {
-            auto certificateError_ = certificateError.message();
-            std::cout << "Failed to load the certificate: " << certificateError_ << std::endl;
-        }
-
-        if (privateKeyError)
-        {
-            auto privateKeyError_ = privateKeyError.message();
-            std::cout << "Failed to load the private key: " << privateKeyError_ << std::endl;
-        }
-        std::cout << "Initialisation: Checking Certificate and Private Key strings..." << std::endl;
-        checkCertificate();
-        checkPrivateKey();
+        std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
+        return;
+    }
+    else
+    {
+        printf("length of receiverCertificateData = %lu\n", certificateData.size());
+        printf("length of receiverPrivateKeyData = %lu\n", privateKeyData.size());
     }
 
-    void startAccept()
+    ctx.use_certificate(asio::buffer(certificateData, certificateData.size()), ssl::context::pem);
+    ctx.use_private_key(asio::buffer(privateKeyData, privateKeyData.size()), ssl::context::pem);
+}
+
+void Receiver::initialiseSSL()
+{
+    sslSocket.emplace(std::move(*socket), ctx);
+}
+
+void Receiver::run()
+{
+
+    endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP), port);
+
+    boost::system::error_code ec;
+    acceptor.open(endpoint.protocol(), ec);
+    if (ec)
     {
-        acceptor_.async_accept(
-            sslSocket_.lowest_layer(),
-            [this](const boost::system::error_code &error)
-            {
-                if (!error)
-                {
-                    std::cout << "Connection accepted" << std::endl;
-                    connected_ = true;
+        std::cout << "Failed to open acceptor: " << ec.message() << std::endl;
+        return;
+    }
+    acceptor.bind(endpoint, ec);
+    if (ec)
+    {
+        std::cout << "Failed to bind acceptor: " << ec.message() << std::endl;
+        return;
+    }
+    acceptor.listen(asio::socket_base::max_listen_connections, ec);
+    if (ec)
+    {
+        std::cout << "Failed to listen on acceptor: " << ec.message() << std::endl;
+        return;
+    }
+    std::cout << "Listening on acceptor." << std::endl;
 
-                    std::cout << "Checking Certificate and Private Key strings..." << std::endl;
-                    checkCertificate();
-                    checkPrivateKey();
-
-                    sslSocket_.async_handshake(
-                        ssl::stream_base::server,
-                        [this](const boost::system::error_code &handshakeError)
-                        {
-                            if (!handshakeError)
-                            {
-                                std::cout << "Handshake successful" << std::endl;
-                                // Handle further communication with the client, if needed
-                            }
-                            else
-                            {
-                                std::cout << "Handshake failed: " << handshakeError.message() << std::endl;
-                                // Handle the handshake error as needed
-
-                                // Close the sslSocket_
-                                boost::system::error_code closeError;
-                                std::cout << "Closing the socket..." << std::endl;
-                                sslSocket_.lowest_layer().close(closeError);
-                                if (closeError)
-                                {
-                                    std::cout << "Failed to close the socket: " << closeError.message() << std::endl;
-                                    // Handle the socket close error as needed
-                                }
-
-                                // Set connected_ to false since the connection is no longer established
-                                connected_ = false;
-                                std::cout << "Connection closed" << std::endl;
-                            }
-                        });
-                }
-                else
-                {
-                    std::cout << "Connection error: " << error.message() << std::endl;
-                    // Handle the connection error as needed
-                }
-            });
+    acceptor.accept(*socket, ec);
+    if (ec)
+    {
+        std::cout << "Failed to accept connection: " << ec.message() << std::endl;
+        return;
     }
 
-    void connect(const std::string &receiverIP, unsigned short port)
+    // Initialize the SSL socket after acceptor.accept()
+    initialiseSSL();
+
+    // Check SSL socket before handshaking
+    if (sslSocket)
     {
-        tcp::endpoint endpoint(asio::ip::address::from_string(receiverIP), port);
-        acceptor_.open(endpoint.protocol());
-        acceptor_.set_option(tcp::acceptor::reuse_address(true));
-        acceptor_.bind(endpoint);
-        acceptor_.listen();
-
-        std::cout << "Listening for incoming connections..." << std::endl;
-        startAccept();
-    }
-
-    std::string receive()
-    {
-        std::array<char, 128> buffer;
-        boost::system::error_code error;
-        size_t bytesRead = sslSocket_.read_some(boost::asio::buffer(buffer), error);
-        io_context_.run();
-
-        if (!connected_)
+        sslSocket->handshake(ssl::stream_base::server, ec);
+        if (ec)
         {
-            std::cout << "Not connected, aborting receive" << std::endl;
-            return "";
+            std::cout << "Handshake failed: " << ec.message() << std::endl;
+            return;
         }
-        else
-        {
-            std::cout << "Connected, receiving..." << std::endl;
-        }
+        std::cout << "Handshake completed." << std::endl;
+
+        // Receive data
+        bytesRead = sslSocket->read_some(boost::asio::buffer(buffer), error);
+        io_context.run();
+
         if (error == boost::asio::error::eof)
         {
             std::cout << "Connection closed by peer" << std::endl;
@@ -146,111 +103,29 @@ public:
         {
             std::cout << "Received " << bytesRead << " bytes" << std::endl;
             std::cout << "Message: " << std::string(buffer.data(), bytesRead) << std::endl;
-            return std::string(buffer.data(), bytesRead);
         }
 
-        return "";
+        // Close the socket
+        sslSocket->shutdown(ec);
+        if (ec)
+        {
+            std::cout << "Failed to shutdown SSL socket: " << ec.message() << std::endl;
+            return;
+        }
     }
-
-    void disconnect()
+    else
     {
-        if (connected_)
-        {
-            std::cout << "Disconnecting..." << std::endl;
-            sslSocket_.shutdown();
-        }
-        else
-        {
-            std::cout << "Not connected, aborting disconnect" << std::endl;
-        }
+        std::cout << "Failed to initialise SSL socket" << std::endl;
     }
+}
 
-private:
-    asio::io_context io_context_;
-    ssl::context ctx_;
-    tcp::acceptor acceptor_;
-    ssl::stream<tcp::socket> sslSocket_;
-    bool connected_;
-    boost::system::error_code certificateError;
-    boost::system::error_code privateKeyError;
-    boost::system::error_code handshakeError;
+std::string Receiver::getEnvVariable(const std::string &varName)
+{
+    char *value = std::getenv(varName.c_str());
 
-    void checkCertificate()
-    {
-        // Check the certificate status
-        long verifyMode = SSL_CTX_get_verify_mode(ctx_.native_handle());
-        if (verifyMode & SSL_VERIFY_PEER)
-        {
-            std::cout << "Certificate verification is enabled" << std::endl;
-        }
-        else
-        {
-            std::cout << "Certificate verification is disabled" << std::endl;
-        }
+    // // Debug output
+    // std::cout << "Environment variable name: \n" << varName << "\n" << std::endl;
+    // std::cout << "Environment variable value: \n" << (value ? value : "(null)") << "\n" << std::endl;
 
-        // use SSL_CTX_get0_certificate to get certificate from ctx_
-        X509 *certificate = SSL_CTX_get0_certificate(ctx_.native_handle());
-        if (certificate != nullptr)
-        {
-            std::cout << "Certificate is available" << std::endl;
-            // convert X509 to string
-            std::string certificateString;
-            BIO *bio = BIO_new(BIO_s_mem());
-            if (bio != nullptr)
-            {
-                if (PEM_write_bio_X509(bio, certificate) == 1)
-                {
-                    char buffer[1024];
-                    int bytesRead;
-                    while ((bytesRead = BIO_read(bio, buffer, sizeof(buffer))) > 0)
-                    {
-                        certificateString.append(buffer, bytesRead);
-                    }
-                }
-            }
-            BIO_free_all(bio);
-            // Output the certificate string
-            std::cout << "Certificate: \n"
-                      << certificateString.substr(28, 28 + 10) << std::endl;
-        }
-        else
-        {
-            std::cout << "Certificate is not available" << std::endl;
-        }
-    }
-
-    void checkPrivateKey()
-    {
-        // Use SSL_CTX_get0_privatekey to get the private key from ctx_
-        EVP_PKEY *privateKey = SSL_CTX_get0_privatekey(ctx_.native_handle());
-        if (privateKey != nullptr)
-        {
-            std::cout << "Private key is available" << std::endl;
-
-            // Convert EVP_PKEY to string
-            std::string privateKeyString;
-            BIO *bio = BIO_new(BIO_s_mem());
-            if (bio != nullptr)
-            {
-                if (PEM_write_bio_PrivateKey(bio, privateKey, nullptr, nullptr, 0, nullptr, nullptr) == 1)
-                {
-                    char buffer[1024];
-                    int bytesRead;
-                    while ((bytesRead = BIO_read(bio, buffer, sizeof(buffer))) > 0)
-                    {
-                        privateKeyString.append(buffer, bytesRead);
-                    }
-                }
-                BIO_free_all(bio);
-            }
-
-            // Output the private key string
-            std::cout << "Private key: \n"
-                      << privateKeyString.substr(28, 28 + 10) << std::endl;
-        }
-        else
-        {
-            std::cout << "Private key is not available" << std::endl;
-        }
-    }
-};
+    return value ? value : "";
+}
