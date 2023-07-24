@@ -9,7 +9,7 @@ int main() {
 
     try {
         Sender sender(certificateEnvVar, privateKeyEnvVar);
-        sender.connect("127.0.0.1", 1234);
+        sender.connect("127.0.0.1", 4321);
         sender.send(message);
         sender.disconnect();
     } catch (const std::exception& e) {
