@@ -1,5 +1,4 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -33,4 +32,4 @@ private:
     boost::system::error_code handshakeError;
 };
 
-#endif // CLIENT_HPP
+

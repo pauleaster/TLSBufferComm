@@ -1,5 +1,4 @@
-#include <iostream>
-#include "client.cpp"
+#include "../include/client.hpp"
 
 int main() {
     std::string message = "Hello from client";

@@ -14,8 +14,8 @@ include_directories(/usr/local/include/boost)
 link_directories(/usr/local/lib)
 
 # Specify the executable targets and their dependencies
-add_executable(client client_main.cpp client.cpp)
-add_executable(server server_main.cpp)
+add_executable(client src/client_main.cpp src/client.cpp)
+add_executable(server src/server_main.cpp src/server.cpp)
 
 # Link the necessary libraries
 target_link_libraries(client boost_system ssl crypto)
