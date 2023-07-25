@@ -1,6 +1,6 @@
 # Encrypted_buffer
 
-Demo C++ program to test encrypted buffer
+Demo C++ program to communicate over a TLS encrypted buffer using the Boost Asio library with OpenSSL on Linux.
 
 Note that it appears that the private key and certificate are whitespace dependent.
 The certificates should have no white spaces after the first line, a similar thing for the private key.
