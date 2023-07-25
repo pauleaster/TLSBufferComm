@@ -1,5 +1,5 @@
-receiver
-sender
+server
+client
 Makefile
 CMakeFiles/
 cmake_install.cmake

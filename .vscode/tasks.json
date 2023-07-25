@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "build_sender",
+        "label": "build_client",
         "type": "shell",
         "command": "g++",
         "args": [
@@ -12,10 +12,10 @@
           "-L",
           "/usr/local/lib",
           "-ftrack-macro-expansion=0","-ftrack-macro-expansion=0",
-          "${workspaceFolder}/sender_main.cpp",
-          "${workspaceFolder}/sender.cpp",
+          "${workspaceFolder}/client_main.cpp",
+          "${workspaceFolder}/client.cpp",
           "-o",
-          "${workspaceFolder}/sender",
+          "${workspaceFolder}/client",
           "-lboost_system",
           "-lssl",
           "-lcrypto"
@@ -26,7 +26,7 @@
         }
       },
       {
-        "label": "build_receiver",
+        "label": "build_server",
         "type": "shell",
         "command": "g++",
         "args": [
@@ -36,101 +36,9 @@
           "-L",
           "/usr/local/lib",
           "-ftrack-macro-expansion=0",
-          "${workspaceFolder}/receiver_main.cpp",
+          "${workspaceFolder}/server_main.cpp",
           "-o",
-          "${workspaceFolder}/receiver",
-          "-lboost_system",
-          "-lssl",
-          "-lcrypto"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      },
-      {
-        "label": "build_receiver_proc",
-        "type": "shell",
-        "command": "g++",
-        "args": [
-          "-std=c++20","-ftrack-macro-expansion=0",
-          "-I",
-          "/usr/local/include/boost",
-          "-L",
-          "/usr/local/lib",
-          "-ftrack-macro-expansion=0",
-          "${workspaceFolder}/receiver_proc.cpp",
-          "-o",
-          "${workspaceFolder}/receiver_proc",
-          "-lboost_system",
-          "-lssl",
-          "-lcrypto"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      },
-      {
-        "label": "build_receiver_proc2",
-        "type": "shell",
-        "command": "g++",
-        "args": [
-          "-std=c++20","-ftrack-macro-expansion=0",
-          "-I",
-          "/usr/local/include/boost",
-          "-L",
-          "/usr/local/lib",
-          "-ftrack-macro-expansion=0",
-          "${workspaceFolder}/receiver_proc2.cpp",
-          "-o",
-          "${workspaceFolder}/receiver_proc2",
-          "-lboost_system",
-          "-lssl",
-          "-lcrypto"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      },
-      {
-        "label": "build_sender_proc",
-        "type": "shell",
-        "command": "g++",
-        "args": [
-          "-std=c++20","-ftrack-macro-expansion=0",
-          "-I",
-          "/usr/local/include/boost",
-          "-L",
-          "/usr/local/lib",
-          "-ftrack-macro-expansion=0",
-          "${workspaceFolder}/sender_proc.cpp",
-          "-o",
-          "${workspaceFolder}/sender_proc",
-          "-lboost_system",
-          "-lssl",
-          "-lcrypto"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      },
-      {
-        "label": "build_sender_proc2",
-        "type": "shell",
-        "command": "g++",
-        "args": [
-          "-std=c++20","-ftrack-macro-expansion=0",
-          "-I",
-          "/usr/local/include/boost",
-          "-L",
-          "/usr/local/lib",
-          "-ftrack-macro-expansion=0",
-          "${workspaceFolder}/sender_proc2.cpp",
-          "-o",
-          "${workspaceFolder}/sender_proc2",
+          "${workspaceFolder}/server",
           "-lboost_system",
           "-lssl",
           "-lcrypto"
@@ -168,10 +76,10 @@
       },
     "configurations": [
       {
-        "name": "Debug Sender",
+        "name": "Debug Client",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/sender",
+        "program": "${workspaceFolder}/client",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
@@ -181,18 +89,18 @@
         "miDebuggerPath": "gdb"
       },
       {
-        "name": "Run Sender",
+        "name": "Run Client",
         "type": "shell",
         "request": "launch",
-        "program": "${workspaceFolder}/sender",
+        "program": "${workspaceFolder}/client",
         "args": [],
         "cwd": "${workspaceFolder}"
       },
       {
-        "name": "Debug Receiver",
+        "name": "Debug Server",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/receiver",
+        "program": "${workspaceFolder}/server",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
@@ -202,10 +110,10 @@
         "miDebuggerPath": "gdb"
       },
       {
-        "name": "Run Receiver",
+        "name": "Run Server",
         "type": "shell",
         "request": "launch",
-        "program": "${workspaceFolder}/receiver",
+        "program": "${workspaceFolder}/server",
         "args": [],
         "cwd": "${workspaceFolder}"
       }

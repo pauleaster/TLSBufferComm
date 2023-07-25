@@ -3,5 +3,5 @@ echo Running cmake
 cmake .
 echo Running make
 make
-echo Running receiver/server
-./receiver
+echo Running server/server
+./server
