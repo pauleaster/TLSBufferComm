@@ -1,4 +1,4 @@
-// receiver.hpp (Header file for Receiver class)
+// server.hpp (Header file for Server class)
 #pragma once
 
 #include <array>
@@ -12,10 +12,10 @@ namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
 
-class Receiver
+class Server
 {
 public:
-  Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string receiverIP, const unsigned short port);
+  Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port);
 
   std::string run();
   void startListening();
@@ -38,7 +38,7 @@ private:
   boost::system::error_code error;
   size_t bytesRead;
   std::string msg;
-  std::string receiverIP_;
+  std::string serverIP_;
   unsigned short port_;
 
   std::string getEnvVariable(const std::string &varName);

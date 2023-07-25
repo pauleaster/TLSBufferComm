@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # execute this script with:
-# prompt> bash ./keys/generate_sender_keys_bash.sh
+# prompt> bash ./keys/generate_client_keys_bash.sh
 # note the initial "." and the space between the two paths!!!
 # or 
-# prompt> bash ./keys/generate_sender_keys_bash.sh mydomain.com
+# prompt> bash ./keys/generate_client_keys_bash.sh mydomain.com
 
 # Check if an argument is provided, otherwise use the default domain
 if [ $# -eq 0 ]; then
@@ -31,20 +31,20 @@ certificate_data=$(cat "$cert_file")
 private_key_data=$(cat "$key_file")
 
 # Write the certificate data to a file
-certificate_file="$ssl_directory/eb_sender_certificate.pem"
+certificate_file="$ssl_directory/eb_client_certificate.pem"
 echo "$certificate_data" > "$certificate_file"
 
 # Write the private key data to a file
-private_key_file="$ssl_directory/eb_sender_private_key.pem"
+private_key_file="$ssl_directory/eb_client_private_key.pem"
 echo "$private_key_data" > "$private_key_file"
 
 # Set the environment variables
-export EB_SENDER_CERTIFICATE_DATA="$certificate_data"
-export EB_SENDER_PRIVATE_KEY_DATA="$private_key_data"
+export EB_CLIENT_CERTIFICATE_DATA="$certificate_data"
+export EB_CLIENT_PRIVATE_KEY_DATA="$private_key_data"
 
 # Append the environment variable definitions to the fish config file
-echo "set -xg EB_SENDER_CERTIFICATE_DATA '$certificate_data'" >> ~/.config/fish/config.fish
-echo "set -xg EB_SENDER_PRIVATE_KEY_DATA '$private_key_data'" >> ~/.config/fish/config.fish
+echo "set -xg EB_CLIENT_CERTIFICATE_DATA '$certificate_data'" >> ~/.config/fish/config.fish
+echo "set -xg EB_CLIENT_PRIVATE_KEY_DATA '$private_key_data'" >> ~/.config/fish/config.fish
 
 
 echo "Keys generation completed successfully for Bash."

@@ -1,4 +1,3 @@
-#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 2
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
@@ -8,10 +7,10 @@ namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
 
-class Sender
+class Client
 {
 public:
-    Sender(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
+    Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
         : io_context_(),
           ctx_(ssl::context::sslv23_client),
           socket_(io_context_, ctx_),
@@ -22,7 +21,7 @@ public:
 
         if (!certificateData || !privateKeyData)
         {
-            std::cerr << "Sender certificate data or private key data not provided." << std::endl;
+            std::cerr << "Client certificate data or private key data not provided." << std::endl;
             throw std::runtime_error("Certificate or private key data missing.");
         }
 
@@ -51,7 +50,7 @@ public:
         checkPrivateKey();
     }
 
-    void connect(const std::string &receiverIP, unsigned short port)
+    void connect(const std::string &serverIP, unsigned short port)
     {
         if (connected_)
         {
@@ -60,7 +59,7 @@ public:
         }
 
         tcp::resolver resolver(io_context_);
-        tcp::resolver::query query(receiverIP, std::to_string(port));
+        tcp::resolver::query query(serverIP, std::to_string(port));
         tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
         asio::async_connect(
@@ -78,7 +77,7 @@ public:
                             if (!error)
                             {
                                 connected_ = true;
-                                std::cout << "Connected to the receiver" << std::endl;
+                                std::cout << "Connected to the server" << std::endl;
                             }
                             else
                             {
@@ -118,7 +117,7 @@ public:
 
         socket_.shutdown();
         connected_ = false;
-        std::cout << "Disconnected from the receiver" << std::endl;
+        std::cout << "Disconnected from the server" << std::endl;
     }
 
 private:
@@ -126,7 +125,7 @@ private:
     {
         if (!error)
         {
-            std::cout << "Connected to the receiver" << std::endl;
+            std::cout << "Connected to the server" << std::endl;
         }
         else
         {

@@ -1,7 +1,7 @@
-// receiver.cpp
-#include "receiver.hpp"
+// server.cpp
+#include "server.hpp"
 
-Receiver::Receiver(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string receiverIP, const unsigned short port)
+Server::Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
     : io_context(),
       ctx(ssl::context::sslv23),
       endpoint(),
@@ -14,27 +14,27 @@ Receiver::Receiver(const std::string &certificateEnvVar, const std::string &priv
       privateKeyData(),
       sslSocket() // Initialize sslSocket as empty (std::nullopt)
 {
-    receiverIP_ = receiverIP;
+    serverIP_ = serverIP;
     port_ = port;
     certificateData = getEnvVariable(certificateEnvVar);
     privateKeyData = getEnvVariable(privateKeyEnvVar);
 
     if (certificateData.empty() || privateKeyData.empty())
     {
-        std::cerr << "Receiver certificate data or private key data not provided." << std::endl;
+        std::cerr << "Server certificate data or private key data not provided." << std::endl;
         return;
     }
     else
     {
-        printf("length of receiverCertificateData = %lu\n", certificateData.size());
-        printf("length of receiverPrivateKeyData = %lu\n", privateKeyData.size());
+        printf("length of serverCertificateData = %lu\n", certificateData.size());
+        printf("length of serverPrivateKeyData = %lu\n", privateKeyData.size());
     }
 
     ctx.use_certificate(asio::buffer(certificateData, certificateData.size()), ssl::context::pem);
     ctx.use_private_key(asio::buffer(privateKeyData, privateKeyData.size()), ssl::context::pem);
 }
 
-std::string Receiver::getEnvVariable(const std::string &varName)
+std::string Server::getEnvVariable(const std::string &varName)
 {
     char *value = std::getenv(varName.c_str());
 
@@ -45,9 +45,9 @@ std::string Receiver::getEnvVariable(const std::string &varName)
     return value ? value : "";
 }
 
-void Receiver::startListening()
+void Server::startListening()
 {
-    endpoint = tcp::endpoint(asio::ip::address::from_string(receiverIP_), port_);
+    endpoint = tcp::endpoint(asio::ip::address::from_string(serverIP_), port_);
 
     acceptor.open(endpoint.protocol(), error);
     if (error)
@@ -72,10 +72,10 @@ void Receiver::startListening()
         return;
     }
     // output listening message with IP address and port
-    std::cout << "Listening on " << receiverIP_ << ":" << port_ << std::endl;
+    std::cout << "Listening on " << serverIP_ << ":" << port_ << std::endl;
 }
 
-void Receiver::acceptConnection()
+void Server::acceptConnection()
 {
     acceptor.accept(*socket, error);
     if (error)
@@ -85,12 +85,12 @@ void Receiver::acceptConnection()
     }
 }
 
-void Receiver::initialiseSSL()
+void Server::initialiseSSL()
 {
     sslSocket.emplace(std::move(*socket), ctx);
 }
 
-void Receiver::doHandshake()
+void Server::doHandshake()
 {
 
     // Check SSL socket before handshaking
@@ -111,7 +111,7 @@ void Receiver::doHandshake()
     }
 }
 
-std::string Receiver::receiveData()
+std::string Server::receiveData()
 {
     // Receive data
     std::cout << "Receiving data..." << std::endl;
@@ -134,7 +134,7 @@ std::string Receiver::receiveData()
     }
 }
 
-void Receiver::closeSocket()
+void Server::closeSocket()
 {
     // Check SSL socket before closing
     std::cout << "Closing socket..." << std::endl;
@@ -156,7 +156,7 @@ void Receiver::closeSocket()
     }
 }
 
-std::string Receiver::run()
+std::string Server::run()
 {
     startListening();
     acceptConnection();
