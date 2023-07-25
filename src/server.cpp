@@ -1,5 +1,5 @@
 // server.cpp
-#include "server.hpp"
+#include "../include/server.hpp"
 
 Server::Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
     : io_context(),
