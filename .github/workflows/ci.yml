@@ -32,6 +32,11 @@ jobs:
         make
 
     - name: Run tests
+      env:
+        EB_CLIENT_CERTIFICATE_DATA: ${{ secrets.EB_CLIENT_CERTIFICATE_DATA }}
+        EB_CLIENT_PRIVATE_KEY_DATA: ${{ secrets.EB_CLIENT_PRIVATE_KEY_DATA }}
+        EB_SERVER_CERTIFICATE_DATA: ${{ secrets.EB_SERVER_CERTIFICATE_DATA }}
+        EB_SERVER_PRIVATE_KEY_DATA: ${{ secrets.EB_SERVER_PRIVATE_KEY_DATA }}
       run: |
         cd tests/build
         ./tests
