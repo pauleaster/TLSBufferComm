@@ -3,7 +3,7 @@
 
 Server::Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
     : io_context(),
-      ctx(ssl::context::sslv23),
+      ctx(ssl::context::tlsv13),
       endpoint(),
       acceptor(io_context),
       socket(std::make_shared<tcp::socket>(io_context)),

@@ -3,7 +3,7 @@
 
 Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
     : io_context_(),
-      ctx_(ssl::context::sslv23_client),
+      ctx_(ssl::context::tlsv13_client),
       socket_(io_context_, ctx_),
       connected_(false)
 {

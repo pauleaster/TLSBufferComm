@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include "../include/server.hpp"
 #include "../include/client.hpp"
+#include <gtest/gtest.h>
 
 std::condition_variable cv;
 std::mutex cv_m; // This mutex is used for the condition variable
@@ -35,7 +36,14 @@ void client_thread_function() {
     }
 }
 
-int main() {
+class EncryptedBufferTest : public ::testing::Test {
+protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+
+TEST_F(EncryptedBufferTest, CheckMessages) {
     const std::string certificateEnvVar = "EB_SERVER_CERTIFICATE_DATA";
     const std::string privateKeyEnvVar = "EB_SERVER_PRIVATE_KEY_DATA";
     const std::string serverIP = "127.0.0.1"; // Use the loopback address (localhost)
@@ -59,12 +67,10 @@ int main() {
     // Wait for client thread to finish
     client_thread.join();
 
-    // Check if messages are the same
-    if(server_message == client_message) {
-        // The server and client messages are the same.
-        return 0; // success
-    } else {
-        // The server and client messages are not the same.\n
-        return 1; // failure
-    }
+    ASSERT_EQ(server_message, client_message);
+}
+
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
