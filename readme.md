@@ -1,3 +1,9 @@
+<p align="left">
+  <h1>Encrypted buffer</h1>
+  <a href="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml"><img alt="GitHub Actions status" src="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml/badge.svg"></a>
+</p>
+
+
 # Encrypted_buffer
 
 Demo C++ program to communicate over a TLS encrypted buffer using the Boost Asio library with OpenSSL on Linux.
