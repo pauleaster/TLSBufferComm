@@ -1,5 +1,5 @@
 // client.cpp
-#include "../include/client.hpp"
+#include "client.hpp"
 
 Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
     : io_context_(),

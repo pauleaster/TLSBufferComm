@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-ftrack-macro-expansion=0)
 
 # include directories
-include_directories(/usr/local/include/boost)
+include_directories(${CMAKE_SOURCE_DIR}/include /usr/local/include/boost)
 
 # link directories
 link_directories(/usr/local/lib)
