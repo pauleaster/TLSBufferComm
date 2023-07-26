@@ -1,4 +1,4 @@
-// client.cpp modified for stash
+// client.cpp
 #include "client.hpp"
 
 Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
