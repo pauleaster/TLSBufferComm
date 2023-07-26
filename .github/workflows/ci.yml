@@ -1,0 +1,42 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get install -y cmake g++ libboost-all-dev libssl-dev
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
+    - name: Build application
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Build tests
+      run: |
+        cd tests
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Run tests
+      env:
+        EB_CLIENT_CERTIFICATE_DATA: ${{ secrets.EB_CLIENT_CERTIFICATE_DATA }}
+        EB_CLIENT_PRIVATE_KEY_DATA: ${{ secrets.EB_CLIENT_PRIVATE_KEY_DATA }}
+        EB_SERVER_CERTIFICATE_DATA: ${{ secrets.EB_SERVER_CERTIFICATE_DATA }}
+        EB_SERVER_PRIVATE_KEY_DATA: ${{ secrets.EB_SERVER_PRIVATE_KEY_DATA }}
+      run: |
+        cd tests/build
+        ./tests
