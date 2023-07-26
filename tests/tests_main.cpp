@@ -1,8 +1,8 @@
 #include <iostream>
 #include <thread>
 #include <condition_variable>
-#include "../include/server.hpp"
-#include "../include/client.hpp"
+#include "server.hpp"
+#include "client.hpp"
 #include <gtest/gtest.h>
 
 std::condition_variable cv;
