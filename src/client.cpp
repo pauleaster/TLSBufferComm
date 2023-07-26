@@ -1,11 +1,5 @@
-#include <iostream>
-#include <string>
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-
-namespace asio = boost::asio;
-namespace ssl = boost::asio::ssl;
-using tcp = asio::ip::tcp;
+// client.cpp
+#include "client.hpp"
 
 class Client
 {
