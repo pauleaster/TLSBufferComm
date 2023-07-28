@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: sudo apt-get install -y cmake g++ libboost-all-dev libssl-dev
+      run: sudo apt-get install -y cmake g++ libboost-all-dev libssl-dev doxygen
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
@@ -40,3 +40,12 @@ jobs:
       run: |
         cd tests/build
         ./tests
+
+    - name: Generate Doxygen Documentation
+      run: doxygen Doxyfile
+
+    - name: Deploy Doxygen Documentation to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.5
+      with:
+        branch: gh-pages
+        folder: ./html
