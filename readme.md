@@ -9,25 +9,31 @@ A TLS encrypted client and server written in C++. This project uses the Boost As
 
 # Build instructions
 
-`git clone https://github.com/pauleaster/TLSBufferComm.git` (or use SSH).
-`cd TLSBufferComm`
-`mkdir build`
-`cd build`
-`cmake ..`
-`make`
-Then you should run the server first:
-`./server`
-and in a separate terminal navigate to `./build` and run the client:
-`./client`
+```bash
+
+git clone https://github.com/pauleaster/TLSBufferComm.git # or use ssh
+cd TLSBufferComm
+mkdir build
+cd build
+cmake ..
+make
+# Then you should run the server first:
+./server
+# and in a separate terminal navigate to `./build` and run the client:
+./client
+```
 
 # Test instructions
 
-`cd tests`
-`mkdir build`
-`cd build`
-`cmake ..`
-`make`
-Then you can run the tests:
-`./tests`
+```bash
+
+cd tests
+mkdir build
+cd build
+cmake ..
+make
+# Then you can run the tests:
+./tests
+```
 
 The documentation for this project is [here](https://pauleaster.dev/TLSBufferComm/).
