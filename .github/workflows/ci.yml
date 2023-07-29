@@ -57,3 +57,11 @@ jobs:
         branch: gh-pages
         folder: html
         clean: true
+
+    - name: Trigger GitHub Pages Deployment
+      run: |
+        curl -X POST https://api.github.com/repos/pauleaster/pauleaster.github.io/dispatches \
+        -H 'Accept: application/vnd.github.everest-preview+json' \
+        -u ${{ secrets.TLSBUFFERCOMM_LAUNCH_WEBSITE_DEPLOY }} \
+        --data '{"event_type": "tls-buffer-comm-deploy"}'
+  
