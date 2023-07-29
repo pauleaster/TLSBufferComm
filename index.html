@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TLSBufferComm: Main Page</title>
+<title>TLSBufferComm: TLSBufferComm</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -60,11 +60,36 @@ $(function() {
 </iframe>
 </div>
 
-<div class="header">
+<div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">TLSBufferComm Documentation</div>  </div>
+<div class="title">TLSBufferComm </div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p><a class="anchor" id="md_readme"></a> <a href="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml"><img src="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml/badge.svg" alt="GitHub Actions status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/codeql.yml"><img src="https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/codeql.yml/badge.svg" alt="CodeQL status" style="pointer-events: none;" class="inline"/></a> <a href="https://pauleaster.dev/TLSBufferComm/"><img src="https://img.shields.io/badge/documentation-view-blue" alt="Documentation" class="inline"/></a></p>
+<p>A TLS encrypted client and server written in C++. This project uses the Boost Asio library with OpenSSL on Linux. Both the server and client use an OpenSSL certificate and private key to validate each other.</p>
+<h1><a class="anchor" id="autotoc_md1"></a>
+Build instructions</h1>
+<div class="fragment"><div class="line">git clone https://github.com/pauleaster/TLSBufferComm.git # or use ssh</div>
+<div class="line">cd TLSBufferComm</div>
+<div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ..</div>
+<div class="line">make</div>
+<div class="line"># Then you should run the server first:</div>
+<div class="line">./server</div>
+<div class="line"># and in a separate terminal navigate to `./build` and run the client:</div>
+<div class="line">./client</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md2"></a>
+Test instructions</h1>
+<div class="fragment"><div class="line">cd tests</div>
+<div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ..</div>
+<div class="line">make</div>
+<div class="line"># Then you can run the tests:</div>
+<div class="line">./tests</div>
+</div><!-- fragment --><p>The documentation for this project is <a href="https://pauleaster.dev/TLSBufferComm/">here</a>. </p>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
