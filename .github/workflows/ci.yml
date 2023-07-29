@@ -46,7 +46,8 @@ jobs:
 
     - name: Extract and Store Project Name
       run: |
-        PROJECT_NAME=$(grep "PROJECT_NAME " Doxyfile | cut -d "=" -f 2 | tr -d ' "')
+        PROJECT_NAME=$(grep "PROJECT_NAME" Doxyfile | grep -v "^#" | awk -F "\"" '{print $2}')
+
         echo $PROJECT_NAME > html/project_name.txt      
 
     - name: Deploy Doxygen Documentation to GitHub Pages
