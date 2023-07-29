@@ -10,3 +10,6 @@ chatGpt*.*
 # Doxygen
 html/
 latex/
+
+# vscode
+.vscode/ltex.dictionary.en-US.txt
