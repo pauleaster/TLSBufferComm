@@ -44,6 +44,11 @@ jobs:
     - name: Generate Doxygen Documentation
       run: doxygen Doxyfile
 
+    - name: Extract and Store Project Name
+      run: |
+        PROJECT_NAME=$(grep "PROJECT_NAME " Doxyfile | cut -d "=" -f 2 | tr -d ' "')
+        echo $PROJECT_NAME > html/project_name.txt      
+
     - name: Deploy Doxygen Documentation to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
