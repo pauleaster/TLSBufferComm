@@ -1,6 +1,13 @@
 // client.cpp
 #include "client.hpp"
 
+
+/**
+ * \brief Constructs a new Client.
+ *
+ * \param certificateEnvVar The environment variable containing the certificate.
+ * \param privateKeyEnvVar The environment variable containing the private key.
+ */
 Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
     : io_context_(),
       ctx_(ssl::context::tlsv13_client),
@@ -41,6 +48,12 @@ Client::Client(const std::string &certificateEnvVar, const std::string &privateK
     checkPrivateKey();
 }
 
+/**
+ * \brief Connects to the server.
+ *
+ * \param serverIP The IP address of the server.
+ * \param port The port to connect to.
+ */
 void Client::connect(const std::string &serverIP, unsigned short port)
 {
     if (connected_)
@@ -81,6 +94,11 @@ void Client::connect(const std::string &serverIP, unsigned short port)
     io_context_.run();
 }
 
+/**
+ * \brief Sends a message to the server.
+ *
+ * \param message The message to send.
+ */
 void Client::send(const std::string &message)
 {
     if (!connected_)
@@ -98,6 +116,9 @@ void Client::send(const std::string &message)
         });
 }
 
+/**
+ * \brief Disconnects from the server.
+ */
 void Client::disconnect()
 {
     if (!connected_)
@@ -135,6 +156,9 @@ void Client::handleWrite(const boost::system::error_code &error, size_t bytesTra
     }
 }
 
+/**
+ * \brief Checks the status of the certificate.
+ */
 void Client::checkCertificate()
 {
     // Check the certificate status
@@ -179,6 +203,9 @@ void Client::checkCertificate()
     }
 }
 
+/**
+ * \brief Checks the status of the private key.
+ */
 void Client::checkPrivateKey()
 {
     // Use SSL_CTX_get0_privatekey to get the private key from ctx_
