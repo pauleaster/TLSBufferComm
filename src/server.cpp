@@ -1,6 +1,12 @@
 // server.cpp
 #include "server.hpp"
 
+/**
+ * \brief Constructs a new Server.
+ *
+ * \param certificateEnvVar The environment variable containing the certificate.
+ * \param privateKeyEnvVar The environment variable containing the private key.
+ */
 Server::Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
     : io_context(),
       ctx(ssl::context::tlsv13),

@@ -44,6 +44,12 @@ jobs:
     - name: Generate Doxygen Documentation
       run: doxygen Doxyfile
 
+    - name: Extract and Store Project Name
+      run: |
+        PROJECT_NAME=$(grep "PROJECT_NAME" Doxyfile | grep -v "^#" | awk -F "\"" '{print $2}')
+
+        echo $PROJECT_NAME > html/project_name.txt      
+
     - name: Deploy Doxygen Documentation to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
@@ -51,3 +57,11 @@ jobs:
         branch: gh-pages
         folder: html
         clean: true
+
+    - name: Trigger GitHub Pages Deployment
+      run: |
+        curl -X POST https://api.github.com/repos/pauleaster/pauleaster.github.io/dispatches \
+        -H 'Accept: application/vnd.github.everest-preview+json' \
+        -u ${{ secrets.TLSBUFFERCOMM_LAUNCH_WEBSITE_DEPLOY }} \
+        --data '{"event_type": "tls-buffer-comm-deploy"}'
+  
