@@ -1,7 +1,7 @@
 # TLSBufferComm
 
-[![GitHub Actions status](https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/ci.yml)
-[![CodeQL status](https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/codeql.yml/badge.svg)](https://github.com/pauleaster/encrypted_buffer_cpp/actions/workflows/codeql.yml)
+[![GitHub Actions status](https://github.com/pauleaster/TLSBufferComm/actions/workflows/ci.yml/badge.svg)](https://github.com/pauleaster/TLSBufferComm/actions/workflows/ci.yml)
+[![CodeQL status](https://github.com/pauleaster/TLSBufferComm/actions/workflows/codeql.yml/badge.svg)](https://github.com/pauleaster/TLSBufferComm/actions/workflows/codeql.yml)
 [![Documentation](https://img.shields.io/badge/documentation-view-blue)](https://pauleaster.dev/documentation/TLSBufferComm/)
 
 A TLS encrypted client and server written in C++. This project uses the Boost Asio library with OpenSSL on Linux. Both the server and client use an OpenSSL certificate and private key to validate each other.
