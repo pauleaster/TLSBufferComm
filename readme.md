@@ -24,13 +24,11 @@ make
 
 ## Test instructions
 
+The above build instructions also build the tests. To run the tests do this following:
+
 ```bash
 
-cd tests
-mkdir build
-cd build
-cmake ..
-make
+cd build/tests/
 # Then you can run the tests:
 ./tests
 ```

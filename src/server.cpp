@@ -6,6 +6,8 @@
  *
  * \param certificateEnvVar The environment variable containing the certificate.
  * \param privateKeyEnvVar The environment variable containing the private key.
+ * \param serverIP The IP address for the Client to connect to.
+ * \param port The The port for the Client to connect to.
  */
 Server::Server(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
     : io_context(),

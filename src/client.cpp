@@ -3,17 +3,22 @@
 
 
 /**
- * \brief Constructs a new Client.
+ * \brief Constructs a new Server.
  *
  * \param certificateEnvVar The environment variable containing the certificate.
  * \param privateKeyEnvVar The environment variable containing the private key.
+ * \param serverIP The IP address for the Client to connect to.
+ * \param port The The port for the Client to connect to.
  */
-Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar)
+Client::Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port)
+
     : io_context_(),
       ctx_(ssl::context::tlsv13_client),
       socket_(io_context_, ctx_),
       connected_(false)
 {
+    serverIP_ = serverIP;
+    port_ = port;
     const char *certificateData = std::getenv(certificateEnvVar.c_str());
     const char *privateKeyData = std::getenv(privateKeyEnvVar.c_str());
 
@@ -51,10 +56,8 @@ Client::Client(const std::string &certificateEnvVar, const std::string &privateK
 /**
  * \brief Connects to the server.
  *
- * \param serverIP The IP address of the server.
- * \param port The port to connect to.
  */
-void Client::connect(const std::string &serverIP, unsigned short port)
+void Client::connect()
 {
     if (connected_)
     {
@@ -63,7 +66,7 @@ void Client::connect(const std::string &serverIP, unsigned short port)
     }
 
     tcp::resolver resolver(io_context_);
-    tcp::resolver::query query(serverIP, std::to_string(port));
+    tcp::resolver::query query(serverIP_, std::to_string(port_));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     asio::async_connect(
