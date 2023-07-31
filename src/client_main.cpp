@@ -6,8 +6,8 @@ int main() {
     std::string privateKeyEnvVar = "EB_CLIENT_PRIVATE_KEY_DATA";
 
     try {
-        Client client(certificateEnvVar, privateKeyEnvVar);
-        client.connect("127.0.0.1", 4321);
+        Client client(certificateEnvVar, privateKeyEnvVar, "127.0.0.1", 4321);
+        client.connect();
         client.send(message);
         client.disconnect();
     } catch (const std::exception& e) {

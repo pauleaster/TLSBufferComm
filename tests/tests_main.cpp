@@ -27,8 +27,8 @@ void client_thread_function() {
     }
 
     try {
-        Client client(certificateEnvVar, privateKeyEnvVar);
-        client.connect("127.0.0.1", 4321);
+        Client client(certificateEnvVar, privateKeyEnvVar, "127.0.0.1", 4321);
+        client.connect();
         client.send(client_message);
         client.disconnect();
     } catch (const std::exception& e) {

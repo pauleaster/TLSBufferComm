@@ -16,16 +16,8 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
-    - name: Build application
+    - name: Build application and tests
       run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
-
-    - name: Build tests
-      run: |
-        cd tests
         mkdir build
         cd build
         cmake ..
@@ -38,7 +30,7 @@ jobs:
         EB_SERVER_CERTIFICATE_DATA: ${{ secrets.EB_SERVER_CERTIFICATE_DATA }}
         EB_SERVER_PRIVATE_KEY_DATA: ${{ secrets.EB_SERVER_PRIVATE_KEY_DATA }}
       run: |
-        cd tests/build
+        cd build/tests
         ./tests
 
     - name: Generate Doxygen Documentation
