@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['readme_2emd_17',['readme.md',['../d0/d20/readme_8md.html',1,'']]],
-  ['receivedata_18',['receiveData',['../db/d00/classServer.html#aada359d18c17f8b8c83e91443e0978e3',1,'Server']]],
-  ['run_19',['run',['../db/d00/classServer.html#a01c42a319a86046d9b4ac5174666dcc5',1,'Server']]]
+  ['main_0',['main',['../dd/d05/client__main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main():&#160;client_main.cpp'],['../d0/d07/server__main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main():&#160;server_main.cpp'],['../d1/d04/tests__main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627',1,'main(int argc, char **argv):&#160;tests_main.cpp']]],
+  ['message_5fmutex_1',['message_mutex',['../d1/d04/tests__main_8cpp.html#addf7f72ce8e4ee45a3c049410458b145',1,'tests_main.cpp']]]
 ];
