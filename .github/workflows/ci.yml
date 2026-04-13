@@ -2,6 +2,9 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -53,7 +56,7 @@ jobs:
     - name: Deploy Doxygen Documentation to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
-        token: ${{ secrets.DOCS_TOKEN }}
+        token: ${{ github.token }}
         branch: gh-pages
         folder: html
         clean: true
