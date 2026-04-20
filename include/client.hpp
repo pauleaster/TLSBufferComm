@@ -12,8 +12,8 @@ using tcp = asio::ip::tcp;
 class Client
 {
 public:
-    Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar);
-    void connect(const std::string &serverIP, unsigned short port);
+    Client(const std::string &certificateEnvVar, const std::string &privateKeyEnvVar, const std::string serverIP, const unsigned short port);
+    void connect();
     void send(const std::string &message);
     void disconnect();
 
@@ -30,6 +30,8 @@ private:
     boost::system::error_code certificateError;
     boost::system::error_code privateKeyError;
     boost::system::error_code handshakeError;
+    std::string serverIP_;
+    unsigned short port_;
 };
 
 

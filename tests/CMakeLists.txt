@@ -8,20 +8,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # To avoid repeating these options for each target
 add_compile_options(-ftrack-macro-expansion=0)
 
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 # add the Google Test directory
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../googletest googletest)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../googletest ${CMAKE_CURRENT_SOURCE_DIR}/../googletest)
 
-
-# ${CMAKE_SOURCE_DIR} is ./tests, source in ./src, include in ./include
+# ${CMAKE_CURRENT_SOURCE_DIR} is ./tests, source in ./src, include in ./include
 
 # include directories
-include_directories(${CMAKE_SOURCE_DIR}/../include /usr/local/include/boost)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+
 
 # link directories
 link_directories(/usr/local/lib)
 
 # Specify the executable target for tests
-add_executable(tests tests_main.cpp ${CMAKE_SOURCE_DIR}/../src/client.cpp ${CMAKE_SOURCE_DIR}/../src/server.cpp)
+add_executable(tests tests_main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../src/client.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../src/server.cpp)
 
 # Link the necessary libraries
 target_link_libraries(tests gtest gtest_main boost_system ssl crypto)
